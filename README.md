@@ -1,46 +1,150 @@
-# Getting Started with Create React App
+# ✨ Contact Formulier - Labo 3
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Een moderne, professionele contact formulier applicatie gebouwd met React, TypeScript en Tailwind CSS. Deze app demonstreert geavanceerde UI/UX principes met glasmorfisme design en uitgebreide formulier validatie.
 
-## Available Scripts
+![React](https://img.shields.io/badge/React-19.2.1-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)
+![Vite](https://img.shields.io/badge/Vite-7.2.6-646CFF.svg)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.17-38B2AC.svg)
 
-In the project directory, you can run:
+## 🌟 Features
 
-### `npm start`
+### 🎨 **Moderne UI/UX Design**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Glasmorfisme effecten** met transparante elementen en blur achtergronden
+- **Responsive design** dat werkt op alle apparaten
+- **Smooth animaties** en overgangseffecten
+- **Levensechte schaduwen** en diepte-effecten
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 📝 **Geavanceerde Formulier Functionaliteit**
 
-### `npm test`
+- **Real-time validatie** met duidelijke foutmeldingen
+- **TypeScript ondersteuning** voor type veiligheid
+- **Gecontroleerde componenten** voor optimale state management
+- **Formulier reset** functionaliteit
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 🔧 **Technische Features**
 
-### `npm run build`
+- **Modulaire component architectuur**
+- **Helper functies** voor validatie logica
+- **Error handling** voor gebruikersfeedback
+- **Accessibility** met proper labeling en focus states
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🚀 Technologieën
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Frontend Framework**: React 19.2.1
+- **Programmeertaal**: TypeScript 5.9.3
+- **Build Tool**: Vite 7.2.6
+- **Styling**: Tailwind CSS 4.1.17
+- **Development**: @vitejs/plugin-react
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📦 Installatie
 
-### `npm run eject`
+1. **Clone de repository**
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+   ```bash
+   git clone https://github.com/HamedSadim1/labo3-inputfield.git
+   cd labo3-inputfield
+   ```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. **Installeer dependencies**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+   ```bash
+   npm install
+   ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+3. **Start de development server**
 
-## Learn More
+   ```bash
+   npm run dev
+   ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+4. **Open je browser**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+   ```text
+   http://localhost:5173
+   ```
+
+## 🎯 Gebruik
+
+### Formulier Velden
+
+- **Naam**: Verplicht tekstveld
+- **Email**: Verplicht email veld met validatie
+- **Leeftijd**: Verplicht numeriek veld (minimum 0)
+- **Wachtwoord**: Verplicht wachtwoord veld (minimaal 6 karakters)
+- **Bevestig wachtwoord**: Moet overeenkomen met wachtwoord
+- **Bericht**: Optioneel tekstgebied
+
+### Validatie Regels
+
+- Alle verplichte velden moeten ingevuld zijn
+- Email moet een geldig formaat hebben
+- Wachtwoorden moeten overeenkomen
+- Leeftijd moet een positief getal zijn
+
+## 🏗️ Project Structuur
+
+```text
+src/
+├── components/
+│   ├── InputField.tsx      # Herbruikbare input component
+│   ├── InputFields.tsx     # Hoofdformulier component
+│   └── SuccessScreen.tsx   # Succes scherm component
+├── utils/
+│   └── validation.ts       # Validatie logica en types
+├── index.css               # Globale styling
+├── index.tsx               # Applicatie entry point
+└── App.tsx                 # Root component
+```
+
+## 📜 Scripts
+
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| `npm run dev`     | Start development server |
+| `npm run build`   | Build voor productie     |
+| `npm run preview` | Preview productie build  |
+
+## 🎨 Design Systeem
+
+### Kleurenpalet
+
+- **Primaire achtergrond**: Gradient van blauw naar paars naar roze
+- **Glas effecten**: Transparante witte overlays met blur
+- **Accent kleuren**: Groen voor succes states, rood voor errors
+
+### Typografie
+
+- **Hoofdingen**: Bold, witte tekst met drop shadows
+- **Body tekst**: Semi-transparante witte tekst
+- **Labels**: Compacte, duidelijke labeling
+
+### Componenten
+
+- **Buttons**: Glazen styling met hover effecten
+- **Inputs**: Transparante velden met focus states
+- **Containers**: Rounded corners met schaduwen
+
+## 🤝 Bijdragen
+
+1. Fork het project
+2. Maak een feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit je veranderingen (`git commit -m 'Add some AmazingFeature'`)
+4. Push naar de branch (`git push origin feature/AmazingFeature`)
+5. Open een Pull Request
+
+## 📄 Licentie
+
+Dit project is gelicentieerd onder de MIT License - zie het [LICENSE](LICENSE) bestand voor details.
+
+## 🙏 Erkenningen
+
+- **React** - Voor het geweldige framework
+- **Vite** - Voor de snelle build tool
+- **Tailwind CSS** - Voor het utility-first CSS framework
+- **TypeScript** - Voor type veiligheid
+
+---
+
+Gemaakt met ❤️ voor Labo 3 - Webframeworks
