@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import { CONFETTI_COUNT, CONFETTI_HEIGHT_RATIO } from "@/constants";
+import { createConfettiPieces } from "@/utils/confetti";
 import Button from "@/components/ui/Button";
 import CheckIcon from "@/components/ui/CheckIcon";
 import Screen from "@/components/layout/Screen";
@@ -9,41 +11,8 @@ interface SuccessScreenProps {
   onReset: () => void;
 }
 
-const CONFETTI_COUNT = 30;
-
-const CONFETTI_COLORS = [
-  "#8b5cf6",
-  "#d946ef",
-  "#f59e0b",
-  "#10b981",
-  "#0ea5e9",
-  "#f43f5e",
-];
-
-interface ConfettiPiece {
-  id: number;
-  left: number;
-  delay: number;
-  duration: number;
-  color: string;
-  size: number;
-  round: boolean;
-}
-
 const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
-  const confetti = useMemo<ConfettiPiece[]>(
-    () =>
-      Array.from({ length: CONFETTI_COUNT }, (_, id) => ({
-        id,
-        left: Math.random() * 100,
-        delay: Math.random() * 3,
-        duration: 3.5 + Math.random() * 3,
-        color: CONFETTI_COLORS[id % CONFETTI_COLORS.length] ?? "#8b5cf6",
-        size: 6 + Math.random() * 8,
-        round: id % 3 === 0,
-      })),
-    []
-  );
+  const confetti = useMemo(() => createConfettiPieces(CONFETTI_COUNT), []);
 
   const summary: Array<[string, string]> = [
     ["Naam", formData.name],
@@ -65,7 +34,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
             style={{
               left: `${piece.left}%`,
               width: piece.size,
-              height: piece.size * 1.6,
+              height: piece.size * CONFETTI_HEIGHT_RATIO,
               backgroundColor: piece.color,
               borderRadius: piece.round ? "9999px" : "3px",
               animationDelay: `${piece.delay}s`,

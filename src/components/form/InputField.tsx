@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { DEFAULT_TEXTAREA_ROWS, MAX_PASSWORD_STRENGTH } from "@/constants";
 import type {
   FormFieldName,
   InputType,
@@ -7,11 +8,8 @@ import type {
 import {
   getPasswordRequirements,
   getPasswordStrength,
-  MAX_PASSWORD_STRENGTH,
 } from "@/utils/validation";
 import { cn } from "@/utils/cn";
-
-const DEFAULT_TEXTAREA_ROWS = 4;
 
 interface InputFieldProps {
   label: string;

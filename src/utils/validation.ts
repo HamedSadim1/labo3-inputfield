@@ -1,15 +1,16 @@
+import {
+  MAX_AGE,
+  MAX_EMAIL_LENGTH,
+  MAX_MESSAGE_LENGTH,
+  MAX_NAME_LENGTH,
+  MAX_PASSWORD_STRENGTH,
+  MIN_AGE,
+  MIN_PASSWORD_LENGTH,
+  PASSWORD_STRONG_LENGTH,
+} from "@/constants";
+import { isIntegerInRange } from "@/utils/number";
+
 export type InputType = "text" | "email" | "password" | "number" | "textarea";
-
-// --- Grenzen en maxima: één bron van waarheid voor UI én validatie ---
-
-export const MIN_PASSWORD_LENGTH = 6;
-export const PASSWORD_STRONG_LENGTH = 10;
-export const MIN_AGE = 0;
-export const MAX_AGE = 120;
-export const MAX_PASSWORD_STRENGTH = 4;
-export const MAX_NAME_LENGTH = 50;
-export const MAX_EMAIL_LENGTH = 254;
-export const MAX_MESSAGE_LENGTH = 500;
 
 // --- Veldconfiguratie: één bron van waarheid voor UI én validatie ---
 
@@ -203,7 +204,7 @@ export const validateForm = (formData: FormData): ValidationErrors => {
 
   if (!formData.age.trim()) {
     errors.age = "Leeftijd is verplicht";
-  } else if (!isValidAge(formData.age)) {
+  } else if (!isIntegerInRange(formData.age, MIN_AGE, MAX_AGE)) {
     errors.age = `Vul een geldige leeftijd in (${MIN_AGE}-${MAX_AGE})`;
   }
 
@@ -217,9 +218,4 @@ export const validateForm = (formData: FormData): ValidationErrors => {
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
-};
-
-const isValidAge = (age: string): boolean => {
-  const num = Number(age);
-  return Number.isInteger(num) && num >= MIN_AGE && num <= MAX_AGE;
 };

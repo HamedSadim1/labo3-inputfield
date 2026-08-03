@@ -1,7 +1,6 @@
+import { STORAGE_KEY } from "@/constants";
 import type { FormData } from "@/utils/validation";
 import { FORM_FIELDS, isFormFieldName } from "@/utils/validation";
-
-const STORAGE_KEY = "contact-form-draft";
 
 export interface FormDraft {
   formData: FormData;

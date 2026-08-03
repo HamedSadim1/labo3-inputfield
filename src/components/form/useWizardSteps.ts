@@ -1,3 +1,6 @@
+import { STEP_EXIT_FALLBACK_MS } from "@/constants";
+import { prefersReducedMotion, readCssDurationMs } from "@/utils/dom";
+import { clamp } from "@/utils/number";
 import { useEffect, useRef, useState } from "react";
 
 type StepDirection = "forward" | "backward";
@@ -10,24 +13,6 @@ const STEP_ENTER: Record<StepDirection, string> = {
 const STEP_EXIT: Record<StepDirection, string> = {
   forward: "animate-slide-out-left",
   backward: "animate-slide-out-right",
-};
-
-const prefersReducedMotion = (): boolean =>
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-// Leest de uitgaande animatieduur uit de CSS-variabele, zodat JS en CSS
-// één bron delen (geen handmatig gespiegelde waarde meer). De minifier
-// normaliseert "250ms" soms naar ".25s", dus de eenheid telt mee.
-const getStepExitMs = (): number => {
-  const raw = window
-    .getComputedStyle(document.documentElement)
-    .getPropertyValue("--step-exit-duration")
-    .trim();
-  const parsed = Number.parseFloat(raw);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return 250;
-  }
-  return raw.endsWith("ms") ? parsed : parsed * 1000;
 };
 
 interface GoToStepOptions {
@@ -56,10 +41,12 @@ export const useWizardSteps = (
   stepCount: number,
   initialStep: number
 ): UseWizardStepsResult => {
-  const clamp = (step: number) => Math.min(Math.max(step, 0), stepCount - 1);
-
-  const [currentStep, setCurrentStep] = useState(() => clamp(initialStep));
-  const [displayedStep, setDisplayedStep] = useState(() => clamp(initialStep));
+  const [currentStep, setCurrentStep] = useState(() =>
+    clamp(initialStep, 0, stepCount - 1)
+  );
+  const [displayedStep, setDisplayedStep] = useState(() =>
+    clamp(initialStep, 0, stepCount - 1)
+  );
   const [direction, setDirection] = useState<StepDirection>("forward");
   const [phase, setPhase] = useState<"enter" | "exit">("enter");
   const stepTimeoutRef = useRef<number | null>(null);
@@ -95,7 +82,9 @@ export const useWizardSteps = (
       },
       // Bij prefers-reduced-motion zijn de CSS-animaties uitgeschakeld;
       // wissel dan direct zonder de exit-vertraging.
-      prefersReducedMotion() ? 0 : getStepExitMs()
+      prefersReducedMotion()
+        ? 0
+        : readCssDurationMs("--step-exit-duration", STEP_EXIT_FALLBACK_MS)
     );
     return true;
   };
@@ -105,8 +94,8 @@ export const useWizardSteps = (
       window.clearTimeout(stepTimeoutRef.current);
       stepTimeoutRef.current = null;
     }
-    setCurrentStep(clamp(step));
-    setDisplayedStep(clamp(step));
+    setCurrentStep(clamp(step, 0, stepCount - 1));
+    setDisplayedStep(clamp(step, 0, stepCount - 1));
     setPhase("enter");
   };
 

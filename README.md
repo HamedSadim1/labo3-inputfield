@@ -88,7 +88,7 @@ Een kleurrijk en speels contactformulier gebouwd met React, TypeScript en Tailwi
 - Leeftijd moet een geheel getal tussen 0 en 120 zijn
 - Naam, e-mail en bericht hebben een maximale lengte (50, 254 en 500 tekens)
 
-Alle grenzen (wachtwoordlengte, leeftijd, veld-maxima) leven als één bron van waarheid in `src/utils/validation.ts` en worden gedeeld door de UI en de validatie
+Alle grenzen (wachtwoordlengte, leeftijd, veld-maxima) leven als één bron van waarheid in `src/constants.ts` en worden gedeeld door de UI en de validatie
 
 ## 🏗️ Project Structuur
 
@@ -109,10 +109,15 @@ src/
 │       ├── WizardHero.tsx      # Hero-sectie met badge, kop en features
 │       ├── useWizardSteps.ts   # Hook voor stapovergangen (exit/enter, reduced-motion)
 │       └── SuccessScreen.tsx   # Succes scherm met confetti en geanimeerd vinkje
+├── constants.ts                # Centrale constanten: grenzen, storage, wizard, confetti (SSOT)
 ├── utils/
 │   ├── cn.ts                   # cn()-helper (clsx + tailwind-merge) voor className-composities
+│   ├── confetti.ts             # Confetti-generatie voor het succes-scherm (type + factory)
+│   ├── dom.ts                  # DOM/browser-hulpen: reduced-motion, CSS-variabelen (duur → ms), focus
+│   ├── form.ts                 # Formulier-hulpen: lege FormData, veldfout-update, fouten per stap filteren
+│   ├── number.ts               # Getal-hulpen: clamp en isIntegerInRange
 │   ├── storage.ts              # localStorage-draft: formuliergegevens bewaren/herstellen
-│   └── validation.ts           # Types, veldconfig (één bron van waarheid voor UI én validatie), validatie logica en wachtwoord-hulpfuncties (sterkte + checklist)
+│   └── validation.ts           # Types, veldconfig (één bron voor velden), validatie logica en wachtwoord-hulpfuncties (sterkte + checklist)
 ├── index.css                   # Globale styling en design tokens (Tailwind v4 @theme)
 ├── index.tsx                   # Applicatie entry point
 └── App.tsx                     # Root component

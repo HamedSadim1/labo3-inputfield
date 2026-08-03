@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { STEP_CONFIG } from "@/constants";
 import InputField from "@/components/form/InputField";
 import StepIndicator from "@/components/form/StepIndicator";
 import WizardActions from "@/components/form/WizardActions";
@@ -7,7 +8,13 @@ import { useWizardSteps } from "@/components/form/useWizardSteps";
 import Screen from "@/components/layout/Screen";
 import SuccessScreen from "@/components/form/SuccessScreen";
 import { clearFormDraft, loadFormDraft, saveFormDraft } from "@/utils/storage";
-import type { FormDraft } from "@/utils/storage";
+import { focusElementAfterRender } from "@/utils/dom";
+import {
+  createEmptyFormData,
+  filterErrorsByFields,
+  updateFieldError,
+} from "@/utils/form";
+import { clamp } from "@/utils/number";
 import type {
   FieldConfig,
   FormData,
@@ -28,12 +35,6 @@ interface Step {
   emoji: string;
   fields: FormFieldName[];
 }
-
-const STEP_CONFIG: Array<{ title: string; emoji: string; step: number }> = [
-  { title: "Gegevens", emoji: "👤", step: 0 },
-  { title: "Veiligheid", emoji: "🔒", step: 1 },
-  { title: "Bericht", emoji: "💬", step: 2 },
-];
 
 // Velden per stap afgeleid uit de veldconfig, zodat de stapindeling en de
 // velden nooit uit elkaar kunnen lopen.
@@ -63,31 +64,14 @@ if (import.meta.env.DEV) {
 // Afgeleid uit de veldconfig: nieuwe velden hoeven hier niet te worden
 // bijgehouden. De {} as FormData-cast is nodig als startwaarde en wordt
 // direct daarna volledig gevuld.
-const initialFormData: FormData = FORM_FIELDS.reduce(
-  (acc, field) => ({ ...acc, [field]: "" }),
-  {} as FormData
-);
-
-const getInitialStep = (draft: FormDraft | null): number =>
-  Math.min(draft?.currentStep ?? 0, STEPS.length - 1);
-
-const updateFieldError = (
-  prev: ValidationErrors,
-  field: FormFieldName,
-  fieldError: string | undefined
-): ValidationErrors => {
-  const next = { ...prev };
-  if (fieldError) {
-    next[field] = fieldError;
-  } else {
-    delete next[field];
-  }
-  return next;
-};
+const initialFormData = createEmptyFormData(FORM_FIELDS);
 
 const InputFields: React.FC = () => {
   const savedDraft = useMemo(loadFormDraft, []);
-  const wizard = useWizardSteps(STEPS.length, getInitialStep(savedDraft));
+  const wizard = useWizardSteps(
+    STEPS.length,
+    clamp(savedDraft?.currentStep ?? 0, 0, STEPS.length - 1)
+  );
   const { currentStep, displayedStep, transitionClass, resetTo } = wizard;
 
   const [formData, setFormData] = useState<FormData>(
@@ -143,24 +127,6 @@ const InputFields: React.FC = () => {
     );
   };
 
-  const getStepErrors = (step: number): ValidationErrors => {
-    const allErrors = validateForm(formData);
-    const stepErrors: ValidationErrors = {};
-    STEPS[step]?.fields.forEach((field) => {
-      const fieldError = allErrors[field];
-      if (fieldError) {
-        stepErrors[field] = fieldError;
-      }
-    });
-    return stepErrors;
-  };
-
-  const focusFieldAfterRender = (field: FormFieldName) => {
-    window.setTimeout(() => {
-      document.getElementById(field)?.focus();
-    }, 0);
-  };
-
   const goToStep = (
     nextStep: number,
     options: { clearErrors?: boolean; focusField?: FormFieldName } = {}
@@ -170,7 +136,7 @@ const InputFields: React.FC = () => {
       onSwapped: (step) => {
         const firstField = focusField ?? STEPS[step]?.fields[0];
         if (firstField) {
-          focusFieldAfterRender(firstField);
+          focusElementAfterRender(firstField);
         }
       },
     });
@@ -186,12 +152,15 @@ const InputFields: React.FC = () => {
 
     // Valideer de huidige stap; de laatste stap verzendt het formulier.
     if (currentStep < STEPS.length - 1) {
-      const stepErrors = getStepErrors(currentStep);
+      const stepErrors = filterErrorsByFields(
+        validateForm(formData),
+        STEPS[currentStep]?.fields ?? []
+      );
       if (Object.keys(stepErrors).length > 0) {
         setErrors(stepErrors);
         const firstError = getFormFieldName(Object.keys(stepErrors)[0]);
         if (firstError) {
-          focusFieldAfterRender(firstError);
+          focusElementAfterRender(firstError);
         }
         return;
       }
@@ -217,7 +186,7 @@ const InputFields: React.FC = () => {
       goToStep(errorStep, { clearErrors: false, focusField: firstField });
       return;
     }
-    focusFieldAfterRender(firstField);
+    focusElementAfterRender(firstField);
   };
 
   const resetForm = () => {
