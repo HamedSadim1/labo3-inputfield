@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Button from "./Button";
 import CheckIcon from "./CheckIcon";
 import InputField from "./InputField";
@@ -39,10 +39,23 @@ const STEPS: Step[] = [
   { title: "Bericht", emoji: "💬", fields: ["message"] },
 ];
 
-const STEP_ANIMATION: Record<"left" | "right", string> = {
-  left: "animate-slide-in-left",
-  right: "animate-slide-in-right",
+type StepDirection = "forward" | "backward";
+
+const STEP_ENTER: Record<StepDirection, string> = {
+  forward: "animate-slide-in-right",
+  backward: "animate-slide-in-left",
 };
+
+const STEP_EXIT: Record<StepDirection, string> = {
+  forward: "animate-slide-out-left",
+  backward: "animate-slide-out-right",
+};
+
+// Moet gelijk zijn aan de --animate-slide-out-* duur in index.css.
+const STEP_EXIT_MS = 250;
+
+const prefersReducedMotion = (): boolean =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const updateFieldError = (
   prev: ValidationErrors,
@@ -69,13 +82,27 @@ const InputFields: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(() =>
     Math.min(savedDraft?.currentStep ?? 0, STEPS.length - 1)
   );
-  const [slideFrom, setSlideFrom] = useState<"left" | "right">("right");
+  const [displayedStep, setDisplayedStep] = useState(() =>
+    Math.min(savedDraft?.currentStep ?? 0, STEPS.length - 1)
+  );
+  const [direction, setDirection] = useState<StepDirection>("forward");
+  const [phase, setPhase] = useState<"enter" | "exit">("enter");
+  const stepTimeoutRef = useRef<number | null>(null);
 
   // Bewaar de formuliergegevens en huidige stap, zodat de wizard een
   // paginaverversing overleeft.
   useEffect(() => {
     saveFormDraft({ formData, currentStep });
   }, [formData, currentStep]);
+
+  // Ruim een lopende stapovergang op als de wizard wordt afgebroken.
+  useEffect(() => {
+    return () => {
+      if (stepTimeoutRef.current !== null) {
+        window.clearTimeout(stepTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -137,14 +164,37 @@ const InputFields: React.FC = () => {
     }, 0);
   };
 
-  const goToStep = (step: number) => {
-    setSlideFrom(step > currentStep ? "right" : "left");
-    setErrors({});
-    setCurrentStep(step);
-    const firstField = STEPS[step]?.fields[0];
-    if (firstField) {
-      focusFieldAfterRender(firstField);
+  const goToStep = (
+    nextStep: number,
+    options: { clearErrors?: boolean; focusField?: FormFieldName } = {}
+  ) => {
+    const { clearErrors = true, focusField } = options;
+    if (nextStep === currentStep) {
+      return;
     }
+    setDirection(nextStep > currentStep ? "forward" : "backward");
+    setPhase("exit");
+    setCurrentStep(nextStep);
+    if (clearErrors) {
+      setErrors({});
+    }
+    if (stepTimeoutRef.current !== null) {
+      window.clearTimeout(stepTimeoutRef.current);
+    }
+    stepTimeoutRef.current = window.setTimeout(
+      () => {
+        setDisplayedStep(nextStep);
+        setPhase("enter");
+        const firstField = focusField ?? STEPS[nextStep]?.fields[0];
+        if (firstField) {
+          focusFieldAfterRender(firstField);
+        }
+        stepTimeoutRef.current = null;
+      },
+      // Bij prefers-reduced-motion zijn de CSS-animaties uitgeschakeld;
+      // wissel dan direct zonder de exit-vertraging.
+      prefersReducedMotion() ? 0 : STEP_EXIT_MS
+    );
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -180,17 +230,23 @@ const InputFields: React.FC = () => {
       step.fields.includes(firstField)
     );
     if (errorStep >= 0 && errorStep !== currentStep) {
-      setSlideFrom(errorStep < currentStep ? "left" : "right");
-      setCurrentStep(errorStep);
+      goToStep(errorStep, { clearErrors: false, focusField: firstField });
+      return;
     }
     focusFieldAfterRender(firstField);
   };
 
   const resetForm = () => {
+    if (stepTimeoutRef.current !== null) {
+      window.clearTimeout(stepTimeoutRef.current);
+      stepTimeoutRef.current = null;
+    }
     setFormData(initialFormData);
     setErrors({});
     setSubmitted(false);
     setCurrentStep(0);
+    setDisplayedStep(0);
+    setPhase("enter");
   };
 
   if (submitted) {
@@ -316,10 +372,14 @@ const InputFields: React.FC = () => {
 
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
               <div
-                key={currentStep}
-                className={`${STEP_ANIMATION[slideFrom]} space-y-5`}
+                key={displayedStep}
+                className={`${
+                  phase === "exit"
+                    ? STEP_EXIT[direction]
+                    : STEP_ENTER[direction]
+                } space-y-5`}
               >
-                {currentStep === 0 && (
+                {displayedStep === 0 && (
                   <>
                     <InputField
                       label="Naam"
@@ -374,7 +434,7 @@ const InputFields: React.FC = () => {
                   </>
                 )}
 
-                {currentStep === 1 && (
+                {displayedStep === 1 && (
                   <>
                     <InputField
                       label="Wachtwoord"
@@ -410,7 +470,7 @@ const InputFields: React.FC = () => {
                   </>
                 )}
 
-                {currentStep === 2 && (
+                {displayedStep === 2 && (
                   <InputField
                     label="Bericht"
                     type="textarea"
@@ -433,6 +493,7 @@ const InputFields: React.FC = () => {
                 {currentStep > 0 && (
                   <Button
                     variant="secondary"
+                    size="md"
                     onClick={() => goToStep(currentStep - 1)}
                   >
                     ← Vorige

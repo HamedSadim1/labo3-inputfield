@@ -18,7 +18,7 @@ Een kleurrijk en speels contactformulier gebouwd met React, TypeScript en Tailwi
 
 ### 📝 Geavanceerde Formulier Functionaliteit
 
-- **Meerstappen-wizard** in 3 stappen (Gegevens → Veiligheid → Bericht) met een speelse progress-indicator, per-stap validatie, klikbare stappen en richtingsbewuste overgangen (van links terug, van rechts vooruit)
+- **Meerstappen-wizard** in 3 stappen (Gegevens → Veiligheid → Bericht) met een speelse progress-indicator, per-stap validatie, klikbare stappen en richtingsbewuste overgangen: de huidige stap schuift subtiel weg (naar links bij Volgende, naar rechts bij Vorige) voordat de nieuwe binnenkomt
 - **Realtime validatie**: fouten verschijnen bij blur en verdwijnen live zodra de gebruiker corrigeert
 - **Wachtwoord-sterktemeter** (score 0-4) met gekleurde segmenten, label en een live checklist van vereisten (lengte, hoofdletter, cijfer, symbool)
 - **Wachtwoord-toggle** (👁️) om ingevoerde tekst te tonen of verbergen
@@ -92,7 +92,7 @@ Een kleurrijk en speels contactformulier gebouwd met React, TypeScript en Tailwi
 ```text
 src/
 ├── components/
-│   ├── Button.tsx              # Herbruikbare button (varianten: primary, secondary, success)
+│   ├── Button.tsx              # Herbruikbare button (varianten + maten: md/lg)
 │   ├── CheckIcon.tsx           # Herbruikbaar checkmark-icoon (stepper + succesvinkje)
 │   ├── FloatingBackground.tsx  # Herbruikbare geanimeerde achtergrond
 │   ├── InputField.tsx          # Herbruikbare input component (iconen, hints, toggle, sterktemeter + checklist)

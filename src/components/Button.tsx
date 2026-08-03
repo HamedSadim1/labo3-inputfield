@@ -1,9 +1,11 @@
 import React from "react";
 
 type ButtonVariant = "primary" | "secondary" | "success";
+type ButtonSize = "md" | "lg";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
+  size?: ButtonSize;
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
@@ -15,8 +17,14 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     "bg-linear-to-r from-teal-500 to-emerald-500 text-white shadow-lg shadow-emerald-300/50 hover:shadow-xl hover:shadow-emerald-400/50 focus-visible:ring-emerald-300",
 };
 
+const SIZE_CLASSES: Record<ButtonSize, string> = {
+  md: "px-5 py-4",
+  lg: "px-6 py-4",
+};
+
 const Button: React.FC<ButtonProps> = ({
   variant = "primary",
+  size = "lg",
   className = "",
   style,
   type = "button",
@@ -31,7 +39,7 @@ const Button: React.FC<ButtonProps> = ({
         ...(isGradient ? { backgroundSize: "200% auto" } : null),
         ...style,
       }}
-      className={`rounded-2xl px-6 py-4 font-display text-lg font-bold transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 ${VARIANT_CLASSES[variant]} ${className}`}
+      className={`rounded-2xl font-display text-lg font-bold transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 ${SIZE_CLASSES[size]} ${VARIANT_CLASSES[variant]} ${className}`}
     />
   );
 };
