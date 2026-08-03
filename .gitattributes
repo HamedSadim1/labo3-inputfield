@@ -1,0 +1,4 @@
+# Altijd LF in de werkmap én in de repo (prettier vereist LF).
+# Voorkomt dat autocrlf/lint-staged bestanden naar CRLF omzetten,
+# waardoor `npm run format:check` na elke checkout/commit zou falen.
+* text=auto eol=lf
