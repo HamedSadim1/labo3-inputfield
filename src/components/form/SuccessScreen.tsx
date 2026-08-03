@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
-import Button from "./Button";
-import CheckIcon from "./CheckIcon";
-import Screen from "./Screen";
-import type { FormData } from "../utils/validation";
+import Button from "@/components/ui/Button";
+import CheckIcon from "@/components/ui/CheckIcon";
+import Screen from "@/components/layout/Screen";
+import type { FormData } from "@/utils/validation";
 
 interface SuccessScreenProps {
   formData: FormData;

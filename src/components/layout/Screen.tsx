@@ -1,6 +1,6 @@
 import React from "react";
-import FloatingBackground from "./FloatingBackground";
-import { cn } from "../utils/cn";
+import FloatingBackground from "@/components/layout/FloatingBackground";
+import { cn } from "@/utils/cn";
 
 type ScreenVariant = "playful" | "celebration";
 

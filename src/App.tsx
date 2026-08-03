@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import InputFields from "./components/InputFields";
+import InputFields from "@/components/form/InputFields";
 
 function App() {
   return (

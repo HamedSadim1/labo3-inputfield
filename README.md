@@ -95,14 +95,18 @@ Alle grenzen (wachtwoordlengte, leeftijd, veld-maxima) leven als één bron van 
 ```text
 src/
 ├── components/
-│   ├── Button.tsx              # Herbruikbare button (varianten + maten: md/lg)
-│   ├── CheckIcon.tsx           # Herbruikbaar checkmark-icoon (stepper + succesvinkje)
-│   ├── FloatingBackground.tsx  # Herbruikbare geanimeerde achtergrond
-│   ├── InputField.tsx          # Herbruikbare input component (iconen, hints, toggle, sterktemeter + checklist)
-│   ├── InputFields.tsx         # Hoofdformulier wizard (velden gerenderd vanuit de veldconfig)
-│   ├── Screen.tsx              # Pagina-shell (gradient + achtergrond + main)
-│   └── SuccessScreen.tsx       # Succes scherm met confetti en geanimeerd vinkje
+│   ├── ui/                     # Herbruikbare UI-primitieven
+│   │   ├── Button.tsx          # Herbruikbare button (varianten + maten: md/lg)
+│   │   └── CheckIcon.tsx       # Herbruikbaar checkmark-icoon (stepper + succesvinkje)
+│   ├── layout/                 # Pagina-schaal componenten
+│   │   ├── FloatingBackground.tsx  # Herbruikbare geanimeerde achtergrond
+│   │   └── Screen.tsx          # Pagina-shell (gradient + achtergrond + main)
+│   └── form/                   # Formulier-flow
+│       ├── InputField.tsx      # Herbruikbare input component (iconen, hints, toggle, sterktemeter + checklist)
+│       ├── InputFields.tsx     # Hoofdformulier wizard (velden gerenderd vanuit de veldconfig)
+│       └── SuccessScreen.tsx   # Succes scherm met confetti en geanimeerd vinkje
 ├── utils/
+│   ├── cn.ts                   # cn()-helper (clsx + tailwind-merge) voor className-composities
 │   ├── storage.ts              # localStorage-draft: formuliergegevens bewaren/herstellen
 │   └── validation.ts           # Types, veldconfig (één bron van waarheid voor UI én validatie), validatie logica en wachtwoord-hulpfuncties (sterkte + checklist)
 ├── index.css                   # Globale styling en design tokens (Tailwind v4 @theme)
@@ -127,6 +131,7 @@ src/
 - **Strikte TypeScript-config**: `strict`, `noUncheckedIndexedAccess` en `verbatimModuleSyntax`
 - **Type-veilige code**: type-guards (`isFormFieldName`, `isRecord`) in plaats van casts; geen `any` of onnodige type-assertions
 - **ESLint als poortwachter**: `no-explicit-any`, `no-unnecessary-type-assertion` en `consistent-type-imports` als harde fouten
+- **`@/`-padalias**: imports via `@/components/...` en `@/utils/...` i.p.v. diepe relatieve paden (tsconfig `paths` + Vite `resolve.alias`)
 - **Conventionele commits** met commitlint, Prettier en lint-staged via husky
 
 ## 🎨 Design Systeem

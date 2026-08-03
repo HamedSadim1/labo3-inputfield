@@ -3,13 +3,13 @@ import type {
   FormFieldName,
   InputType,
   PasswordStrength,
-} from "../utils/validation";
+} from "@/utils/validation";
 import {
   getPasswordRequirements,
   getPasswordStrength,
   MAX_PASSWORD_STRENGTH,
-} from "../utils/validation";
-import { cn } from "../utils/cn";
+} from "@/utils/validation";
+import { cn } from "@/utils/cn";
 
 const DEFAULT_TEXTAREA_ROWS = 4;
 

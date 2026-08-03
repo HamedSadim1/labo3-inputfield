@@ -1,5 +1,5 @@
-import type { FormData } from "./validation";
-import { FORM_FIELDS, isFormFieldName } from "./validation";
+import type { FormData } from "@/utils/validation";
+import { FORM_FIELDS, isFormFieldName } from "@/utils/validation";
 
 const STORAGE_KEY = "contact-form-draft";
 

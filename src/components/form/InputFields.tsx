@@ -1,25 +1,25 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Button from "./Button";
-import CheckIcon from "./CheckIcon";
-import InputField from "./InputField";
-import Screen from "./Screen";
-import SuccessScreen from "./SuccessScreen";
-import { clearFormDraft, loadFormDraft, saveFormDraft } from "../utils/storage";
-import { cn } from "../utils/cn";
-import type { FormDraft } from "../utils/storage";
+import InputField from "@/components/form/InputField";
+import SuccessScreen from "@/components/form/SuccessScreen";
+import Screen from "@/components/layout/Screen";
+import Button from "@/components/ui/Button";
+import CheckIcon from "@/components/ui/CheckIcon";
+import { clearFormDraft, loadFormDraft, saveFormDraft } from "@/utils/storage";
+import type { FormDraft } from "@/utils/storage";
 import type {
   FieldConfig,
   FormData,
   FormFieldName,
   ValidationErrors,
-} from "../utils/validation";
+} from "@/utils/validation";
 import {
   FIELDS,
   FORM_FIELDS,
   getFormFieldName,
   LINKED_FIELDS,
   validateForm,
-} from "../utils/validation";
+} from "@/utils/validation";
+import { cn } from "@/utils/cn";
 
 const FEATURES: Array<[string, string]> = [
   ["⚡", "Realtime validatie en feedback"],
