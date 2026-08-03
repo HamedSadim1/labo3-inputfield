@@ -36,7 +36,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
               >
                 <span
                   className={cn(
-                    "block h-full rounded-full bg-linear-to-r from-emerald-400 to-teal-500 transition-all duration-500",
+                    "block h-full rounded-full bg-linear-to-r from-emerald-600 to-teal-600 transition-all duration-500",
                     isDone ? "w-full" : "w-0"
                   )}
                 />
@@ -52,7 +52,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
               className={cn(
                 "relative flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-300 disabled:cursor-not-allowed",
                 isDone
-                  ? "bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-300/60"
+                  ? "bg-linear-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-300/60"
                   : isCurrent
                     ? "scale-110 bg-linear-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-fuchsia-400/60 ring-4 ring-fuchsia-200"
                     : "border-2 border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-600"

@@ -14,8 +14,10 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     "animate-gradient-x bg-linear-to-r from-violet-600 via-fuchsia-600 to-fuchsia-600 text-white shadow-lg shadow-fuchsia-300/50 hover:shadow-xl hover:shadow-fuchsia-400/50 focus-visible:ring-fuchsia-300",
   secondary:
     "border-2 border-violet-200 bg-white text-violet-600 hover:border-violet-300 hover:shadow-lg focus-visible:ring-violet-200",
+  // from-teal-700 to-emerald-700: witte tekst haalt hiermee AA (5.47:1),
+  // waar de eerdere 500/600-niveaus op 2.5-3.8:1 bleven steken.
   success:
-    "bg-linear-to-r from-teal-500 to-emerald-500 text-white shadow-lg shadow-emerald-300/50 hover:shadow-xl hover:shadow-emerald-400/50 focus-visible:ring-emerald-300",
+    "bg-linear-to-r from-teal-700 to-emerald-700 text-white shadow-lg shadow-emerald-300/50 hover:shadow-xl hover:shadow-emerald-400/50 focus-visible:ring-emerald-300",
 };
 
 // De grootte verschilt bewust in hoogte én lettergrootte, zodat een

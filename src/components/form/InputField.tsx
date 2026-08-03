@@ -40,17 +40,17 @@ const STRENGTH_META: Record<
   PasswordStrength,
   { label: string; barColor: string; textColor: string }
 > = {
-  0: { label: "Zwak", barColor: "bg-rose-500", textColor: "text-rose-600" },
-  1: { label: "Zwak", barColor: "bg-rose-500", textColor: "text-rose-600" },
+  0: { label: "Zwak", barColor: "bg-rose-600", textColor: "text-rose-600" },
+  1: { label: "Zwak", barColor: "bg-rose-600", textColor: "text-rose-600" },
   2: {
     label: "Redelijk",
-    barColor: "bg-amber-500",
+    barColor: "bg-amber-700",
     textColor: "text-amber-700",
   },
-  3: { label: "Goed", barColor: "bg-lime-500", textColor: "text-lime-700" },
+  3: { label: "Goed", barColor: "bg-lime-700", textColor: "text-lime-700" },
   4: {
     label: "Sterk",
-    barColor: "bg-emerald-500",
+    barColor: "bg-emerald-700",
     textColor: "text-emerald-700",
   },
 };

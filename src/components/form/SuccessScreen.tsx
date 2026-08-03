@@ -90,7 +90,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
         <div className="animate-bounce-in w-full max-w-lg overflow-hidden rounded-4xl border border-white/70 bg-white/90 p-8 text-center shadow-2xl shadow-teal-300/50 backdrop-blur-xl sm:p-10">
           <div className="relative mx-auto mb-6 h-24 w-24">
             <div className="absolute inset-0 animate-ping rounded-full bg-emerald-300/40" />
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-300/60">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-emerald-600 to-teal-600 shadow-lg shadow-emerald-300/60">
               <CheckIcon className="h-12 w-12 text-white" animated />
             </div>
           </div>
