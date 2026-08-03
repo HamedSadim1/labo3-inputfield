@@ -103,7 +103,11 @@ src/
 │   │   └── Screen.tsx          # Pagina-shell (gradient + achtergrond + main)
 │   └── form/                   # Formulier-flow
 │       ├── InputField.tsx      # Herbruikbare input component (iconen, hints, toggle, sterktemeter + checklist)
-│       ├── InputFields.tsx     # Hoofdformulier wizard (velden gerenderd vanuit de veldconfig)
+│       ├── InputFields.tsx     # Hoofdformulier wizard (compositie van onderstaande delen)
+│       ├── StepIndicator.tsx   # Progress-indicator / stepper met klikbare stappen
+│       ├── WizardActions.tsx   # Navigatieknoppen (Vorige / Volgende / Verzenden)
+│       ├── WizardHero.tsx      # Hero-sectie met badge, kop en features
+│       ├── useWizardSteps.ts   # Hook voor stapovergangen (exit/enter, reduced-motion)
 │       └── SuccessScreen.tsx   # Succes scherm met confetti en geanimeerd vinkje
 ├── utils/
 │   ├── cn.ts                   # cn()-helper (clsx + tailwind-merge) voor className-composities
