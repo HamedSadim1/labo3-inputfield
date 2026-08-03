@@ -80,6 +80,11 @@ const InputFields: React.FC = () => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
+  // Eén bron voor de stapnaam (legend + live-region).
+  const currentStepLabel = `Stap ${displayedStep + 1}: ${
+    STEPS[displayedStep]?.title ?? ""
+  }`;
+
   // Bewaar de formuliergegevens en huidige stap, zodat de wizard een
   // paginaverversing overleeft.
   useEffect(() => {
@@ -236,48 +241,59 @@ const InputFields: React.FC = () => {
             />
 
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
-              <div
-                key={displayedStep}
-                className={cn(transitionClass, "space-y-5")}
-              >
-                {FIELDS.filter((field) => field.step === displayedStep).map(
-                  (field) => {
-                    // Verbreed naar FieldConfig, zodat de optionele velden
-                    // (autoComplete, hint, ...) zonder cast toegankelijk zijn.
-                    const config: FieldConfig = field;
-                    return (
-                      <InputField
-                        key={config.name}
-                        label={config.label}
-                        type={config.type}
-                        id={config.name}
-                        name={field.name}
-                        value={formData[field.name]}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={errors[field.name]}
-                        placeholder={config.placeholder}
-                        icon={config.icon}
-                        required={config.required}
-                        autoComplete={config.autoComplete}
-                        min={
-                          config.min !== undefined
-                            ? String(config.min)
-                            : undefined
-                        }
-                        max={
-                          config.max !== undefined
-                            ? String(config.max)
-                            : undefined
-                        }
-                        maxLength={config.maxLength}
-                        hint={config.hint}
-                        showPasswordFeedback={config.showPasswordFeedback}
-                      />
-                    );
-                  }
-                )}
-              </div>
+              <fieldset className="m-0 min-w-0 border-0 p-0">
+                {/* Verborgen legend: geeft screenreader-gebruikers de
+                    stapcontext bij de velden (de stepper toont de tekst al). */}
+                <legend className="sr-only">{currentStepLabel}</legend>
+                <div
+                  key={displayedStep}
+                  className={cn(transitionClass, "space-y-5")}
+                >
+                  {FIELDS.filter((field) => field.step === displayedStep).map(
+                    (field) => {
+                      // Verbreed naar FieldConfig, zodat de optionele velden
+                      // (autoComplete, hint, ...) zonder cast toegankelijk zijn.
+                      const config: FieldConfig = field;
+                      return (
+                        <InputField
+                          key={config.name}
+                          label={config.label}
+                          type={config.type}
+                          id={config.name}
+                          name={field.name}
+                          value={formData[field.name]}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          error={errors[field.name]}
+                          placeholder={config.placeholder}
+                          icon={config.icon}
+                          required={config.required}
+                          autoComplete={config.autoComplete}
+                          min={
+                            config.min !== undefined
+                              ? String(config.min)
+                              : undefined
+                          }
+                          max={
+                            config.max !== undefined
+                              ? String(config.max)
+                              : undefined
+                          }
+                          maxLength={config.maxLength}
+                          hint={config.hint}
+                          showPasswordFeedback={config.showPasswordFeedback}
+                        />
+                      );
+                    }
+                  )}
+                </div>
+              </fieldset>
+
+              {/* Polite live-region: kondigt de stapwissel aan voor
+                  screenreaders zodra de nieuwe stap zichtbaar is. */}
+              <span aria-live="polite" className="sr-only">
+                {currentStepLabel}
+              </span>
 
               <WizardActions
                 currentStep={currentStep}
