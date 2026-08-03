@@ -2,10 +2,10 @@
 
 Een moderne, professionele contact formulier applicatie gebouwd met React, TypeScript en Tailwind CSS. Deze app demonstreert geavanceerde UI/UX principes met glasmorfisme design en uitgebreide formulier validatie.
 
-![React](https://img.shields.io/badge/React-19.2.1-blue.svg)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)
-![Vite](https://img.shields.io/badge/Vite-7.2.6-646CFF.svg)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.17-38B2AC.svg)
+![React](https://img.shields.io/badge/React-19.2.8-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-7.0.2-blue.svg)
+![Vite](https://img.shields.io/badge/Vite-8.2.0-646CFF.svg)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-38B2AC.svg)
 
 ## 🌟 Features
 
@@ -32,10 +32,10 @@ Een moderne, professionele contact formulier applicatie gebouwd met React, TypeS
 
 ## 🚀 Technologieën
 
-- **Frontend Framework**: React 19.2.1
-- **Programmeertaal**: TypeScript 5.9.3
-- **Build Tool**: Vite 7.2.6
-- **Styling**: Tailwind CSS 4.1.17
+- **Frontend Framework**: React 19.2.8
+- **Programmeertaal**: TypeScript 7.0.2
+- **Build Tool**: Vite 8.2.0
+- **Styling**: Tailwind CSS 4.3.3
 - **Development**: @vitejs/plugin-react
 
 ## 📦 Installatie
