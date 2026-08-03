@@ -86,9 +86,11 @@ const InputField: React.FC<InputFieldProps> = ({
     // px-4 en pr-12 conflicteren in tailwind-merge (beide padding-groep);
     // daarom bewust aparte subgroepen: links + rechts voor het wachtwoordveld.
     isPassword ? "pl-4 pr-12" : "px-4",
+    // Randen op 500-niveau: de veldgrens is zo ≥3:1 op wit (1.4.11);
+    // de focus-ringen op 500-niveau zijn eveneens ≥3:1 zichtbaar.
     error
-      ? "border-rose-300 bg-rose-50/60 focus:border-rose-400 focus:ring-4 focus:ring-rose-200"
-      : "border-slate-200 hover:border-violet-300 focus:border-violet-400 focus:ring-4 focus:ring-violet-200"
+      ? "border-rose-500 bg-rose-50/60 focus:border-rose-500 focus:ring-4 focus:ring-rose-500"
+      : "border-slate-500 hover:border-violet-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500"
   );
 
   const showChecklist = showPasswordFeedback && (focused || value.length > 0);
@@ -121,7 +123,7 @@ const InputField: React.FC<InputFieldProps> = ({
         )}
         {label}
         {required && (
-          <span aria-hidden="true" className="ml-0.5 text-rose-500">
+          <span aria-hidden="true" className="ml-0.5 text-rose-600">
             *
           </span>
         )}
@@ -171,7 +173,7 @@ const InputField: React.FC<InputFieldProps> = ({
               showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"
             }
             aria-pressed={showPassword}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-lg transition-transform duration-200 hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-lg transition-transform duration-200 hover:scale-110 active:scale-95"
           >
             <span aria-hidden="true">{showPassword ? "🙈" : "👁️"}</span>
           </button>

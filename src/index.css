@@ -203,7 +203,8 @@
   }
 
   :focus-visible {
-    outline: 3px solid #a78bfa;
+    /* violet-600: 5.7:1 op wit, dus duidelijk zichtbaar op alle achtergronden. */
+    outline: 3px solid #7c3aed;
     outline-offset: 2px;
   }
 

@@ -221,7 +221,7 @@ const InputFields: React.FC = () => {
             <div className="mb-6 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
                 <h2 className="font-display text-2xl font-bold text-slate-800 sm:text-3xl">
-                  Contactformulier 📝
+                  Contactformulier <span aria-hidden="true">📝</span>
                 </h2>
                 <p className="mt-1 text-sm font-medium text-slate-500">
                   Velden met een * zijn verplicht

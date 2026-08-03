@@ -15,7 +15,7 @@ const WizardActions: React.FC<WizardActionsProps> = ({
   <div className="flex items-center gap-3 pt-2">
     {currentStep > 0 && (
       <Button variant="secondary" size="md" onClick={onBack}>
-        ← Vorige
+        <span aria-hidden="true">←</span> Vorige
       </Button>
     )}
 

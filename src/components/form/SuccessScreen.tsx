@@ -100,14 +100,15 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
             tabIndex={-1}
             className="font-display text-3xl font-bold text-slate-800"
           >
-            Verzonden! 🎉
+            Verzonden! <span aria-hidden="true">🎉</span>
           </h1>
           <p className="mt-2 text-base font-medium text-slate-600">
             Super,{" "}
             <span className="font-bold text-violet-600">
               {formData.name || "daar"}
             </span>
-            ! We hebben je bericht ontvangen en nemen snel contact op. ✨
+            ! We hebben je bericht ontvangen en nemen snel contact op.{" "}
+            <span aria-hidden="true">✨</span>
           </p>
 
           <dl className="mt-7 space-y-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-5 text-left">
@@ -127,7 +128,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
           </dl>
 
           <Button variant="success" onClick={onReset} className="mt-8 w-full">
-            ✏️ Nieuw formulier
+            <span aria-hidden="true">✏️</span> Nieuw formulier
           </Button>
         </div>
       </main>

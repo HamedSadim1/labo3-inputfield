@@ -50,7 +50,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
               aria-label={isDone ? `${step.title} (voltooid)` : step.title}
               aria-current={isCurrent ? "step" : undefined}
               className={cn(
-                "relative flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-300 disabled:cursor-not-allowed",
+                "relative flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold transition-all duration-300 disabled:cursor-not-allowed",
                 isDone
                   ? "bg-linear-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-300/60"
                   : isCurrent
