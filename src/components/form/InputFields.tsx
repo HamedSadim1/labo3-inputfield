@@ -206,18 +206,20 @@ const InputFields: React.FC = () => {
         <WizardHero />
 
         <section className="w-full max-w-lg">
-          <div className="animate-rise rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-2xl shadow-violet-300/40 backdrop-blur-xl sm:p-8">
+          <div className="animate-rise rounded-4xl border border-white/70 bg-white/85 p-6 shadow-2xl shadow-violet-300/40 backdrop-blur-xl sm:p-8">
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
-                <h2 className="font-display text-2xl font-bold text-slate-800">
+                <h2 className="font-display text-3xl font-bold text-slate-800">
                   Contactformulier 📝
                 </h2>
                 <p className="mt-1 text-sm font-medium text-slate-500">
                   Velden met een * zijn verplicht
                 </p>
               </div>
-              <span className="rounded-full bg-linear-to-r from-violet-600 to-fuchsia-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
-                Stap {currentStep + 1}/{STEPS.length}
+              <span className="rounded-full bg-linear-to-r from-violet-600 to-fuchsia-600 px-3 py-1 text-xs font-bold text-white shadow-sm">
+                {/* displayedStep i.p.v. currentStep: tijdens de exit-animatie
+                    toont de badge nog de stap die zichtbaar is. */}
+                Stap {displayedStep + 1}/{STEPS.length}
               </span>
             </div>
 

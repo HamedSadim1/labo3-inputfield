@@ -45,13 +45,13 @@ const STRENGTH_META: Record<
   2: {
     label: "Redelijk",
     barColor: "bg-amber-500",
-    textColor: "text-amber-600",
+    textColor: "text-amber-700",
   },
-  3: { label: "Goed", barColor: "bg-lime-500", textColor: "text-lime-600" },
+  3: { label: "Goed", barColor: "bg-lime-500", textColor: "text-lime-700" },
   4: {
     label: "Sterk",
     barColor: "bg-emerald-500",
-    textColor: "text-emerald-600",
+    textColor: "text-emerald-700",
   },
 };
 
@@ -82,7 +82,7 @@ const InputField: React.FC<InputFieldProps> = ({
   const strength = getPasswordStrength(value);
 
   const baseClasses = cn(
-    "w-full rounded-2xl border-2 bg-white py-3 text-slate-800 placeholder-slate-400 shadow-sm outline-none transition-all duration-200",
+    "w-full rounded-2xl border-2 bg-white py-3 text-slate-800 placeholder-slate-500 shadow-sm outline-none transition-all duration-200",
     // px-4 en pr-12 conflicteren in tailwind-merge (beide padding-groep);
     // daarom bewust aparte subgroepen: links + rechts voor het wachtwoordveld.
     isPassword ? "pl-4 pr-12" : "px-4",
@@ -235,7 +235,7 @@ const InputField: React.FC<InputFieldProps> = ({
                 key={label}
                 className={cn(
                   "flex items-center gap-1.5 text-xs font-semibold transition-colors duration-200",
-                  met ? "text-emerald-600" : "text-slate-500"
+                  met ? "text-emerald-700" : "text-slate-500"
                 )}
               >
                 <span
@@ -262,7 +262,7 @@ const InputField: React.FC<InputFieldProps> = ({
       ) : null}
 
       {type === "textarea" && maxLength ? (
-        <p className="mt-1 text-right text-xs font-medium text-slate-400">
+        <p className="mt-1 text-right text-xs font-medium text-slate-500">
           {value.length}/{maxLength}
         </p>
       ) : null}

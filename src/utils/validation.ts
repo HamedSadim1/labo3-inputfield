@@ -28,6 +28,8 @@ export interface FieldConfig {
   hint?: string;
   step: number;
   showPasswordFeedback?: boolean;
+  /** Waar: niet opslaan in de localStorage-draft (privacy, bv. wachtwoorden). */
+  sensitive?: boolean;
 }
 
 export const FIELDS = [
@@ -77,6 +79,7 @@ export const FIELDS = [
     autoComplete: "new-password",
     hint: `Minstens ${MIN_PASSWORD_LENGTH} tekens, hoofdletter, cijfer en symbool 💪`,
     showPasswordFeedback: true,
+    sensitive: true,
     step: 1,
   },
   {
@@ -87,6 +90,7 @@ export const FIELDS = [
     placeholder: "Herhaal je wachtwoord",
     required: true,
     autoComplete: "new-password",
+    sensitive: true,
     step: 1,
   },
   {
@@ -111,6 +115,12 @@ export type ValidationErrors = Partial<Record<FormFieldName, string>>;
 export const FORM_FIELDS: readonly FormFieldName[] = FIELDS.map(
   (field) => field.name
 );
+
+// Velden die niet in de localStorage-draft mogen staan (privacy).
+// `in`-check: het sensitive-vlag staat alleen op de velden die het hebben.
+export const SENSITIVE_FIELDS: readonly FormFieldName[] = FIELDS.filter(
+  (field) => "sensitive" in field && field.sensitive
+).map((field) => field.name);
 
 export const isFormFieldName = (
   value: string | undefined

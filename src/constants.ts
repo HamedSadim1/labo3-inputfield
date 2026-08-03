@@ -85,3 +85,9 @@ export const CONFETTI_HEIGHT_RATIO = 1.6;
 
 /** Elke N-de confetti is rond. */
 export const CONFETTI_ROUND_EVERY = 3;
+
+/** Hoelang de confetti zichtbaar is op het succes-scherm (ms). */
+export const CONFETTI_LIFETIME_MS = 9000;
+
+/** Fade-outduur van de confetti aan het einde (ms). */
+export const CONFETTI_FADE_MS = 1000;

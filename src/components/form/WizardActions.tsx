@@ -12,7 +12,7 @@ const WizardActions: React.FC<WizardActionsProps> = ({
   totalSteps,
   onBack,
 }) => (
-  <div className="flex gap-3 pt-2">
+  <div className="flex items-center gap-3 pt-2">
     {currentStep > 0 && (
       <Button variant="secondary" size="md" onClick={onBack}>
         ← Vorige

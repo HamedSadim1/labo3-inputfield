@@ -18,7 +18,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
   currentStep,
   onStepClick,
 }) => (
-  <nav aria-label="Formuliervoortgang" className="mb-8">
+  <nav aria-label="Formuliervoortgang" className="mb-6">
     <ol className="flex">
       {steps.map((step, index) => {
         const isDone = index < currentStep;
@@ -54,8 +54,8 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
                 isDone
                   ? "bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-300/60"
                   : isCurrent
-                    ? "scale-110 bg-linear-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-fuchsia-400/60 ring-4 ring-fuchsia-200"
-                    : "border-2 border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-500"
+                    ? "scale-110 bg-linear-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-fuchsia-400/60 ring-4 ring-fuchsia-200"
+                    : "border-2 border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-600"
               )}
             >
               {isDone ? (
@@ -71,8 +71,8 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
                 isCurrent
                   ? "text-violet-600"
                   : isDone
-                    ? "text-emerald-600"
-                    : "text-slate-400"
+                    ? "text-emerald-700"
+                    : "text-slate-500"
               )}
             >
               {step.title}

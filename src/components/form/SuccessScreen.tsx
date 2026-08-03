@@ -1,9 +1,15 @@
-import React, { useMemo } from "react";
-import { CONFETTI_COUNT, CONFETTI_HEIGHT_RATIO } from "@/constants";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  CONFETTI_COUNT,
+  CONFETTI_FADE_MS,
+  CONFETTI_HEIGHT_RATIO,
+  CONFETTI_LIFETIME_MS,
+} from "@/constants";
 import { createConfettiPieces } from "@/utils/confetti";
 import Button from "@/components/ui/Button";
 import CheckIcon from "@/components/ui/CheckIcon";
 import Screen from "@/components/layout/Screen";
+import { cn } from "@/utils/cn";
 import type { FormData } from "@/utils/validation";
 
 interface SuccessScreenProps {
@@ -14,6 +20,27 @@ interface SuccessScreenProps {
 const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
   const confetti = useMemo(() => createConfettiPieces(CONFETTI_COUNT), []);
 
+  // De confetti valt niet oneindig: na een tijd een korte fade-out en dan
+  // unmount (rustiger voor de gebruiker én de batterij).
+  const [confettiPhase, setConfettiPhase] = useState<
+    "active" | "fading" | "done"
+  >("active");
+
+  useEffect(() => {
+    const fadeTimer = window.setTimeout(
+      () => setConfettiPhase("fading"),
+      CONFETTI_LIFETIME_MS
+    );
+    const doneTimer = window.setTimeout(
+      () => setConfettiPhase("done"),
+      CONFETTI_LIFETIME_MS + CONFETTI_FADE_MS
+    );
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(doneTimer);
+    };
+  }, []);
+
   const summary: Array<[string, string]> = [
     ["Naam", formData.name],
     ["E-mail", formData.email],
@@ -23,26 +50,32 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
 
   return (
     <Screen variant="celebration">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-      >
-        {confetti.map((piece) => (
-          <span
-            key={piece.id}
-            className="absolute -top-5 block animate-confetti"
-            style={{
-              left: `${piece.left}%`,
-              width: piece.size,
-              height: piece.size * CONFETTI_HEIGHT_RATIO,
-              backgroundColor: piece.color,
-              borderRadius: piece.round ? "9999px" : "3px",
-              animationDelay: `${piece.delay}s`,
-              animationDuration: `${piece.duration}s`,
-            }}
-          />
-        ))}
-      </div>
+      {confettiPhase !== "done" && (
+        <div
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-0 overflow-hidden transition-opacity",
+            confettiPhase === "fading" && "opacity-0"
+          )}
+          style={{ transitionDuration: `${CONFETTI_FADE_MS}ms` }}
+        >
+          {confetti.map((piece) => (
+            <span
+              key={piece.id}
+              className="absolute -top-5 block animate-confetti"
+              style={{
+                left: `${piece.left}%`,
+                width: piece.size,
+                height: piece.size * CONFETTI_HEIGHT_RATIO,
+                backgroundColor: piece.color,
+                borderRadius: piece.round ? "9999px" : "3px",
+                animationDelay: `${piece.delay}s`,
+                animationDuration: `${piece.duration}s`,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <main className="relative z-10 flex min-h-dvh items-center justify-center px-4 py-12">
         <div className="animate-bounce-in w-full max-w-lg overflow-hidden rounded-4xl border border-white/70 bg-white/90 p-8 text-center shadow-2xl shadow-teal-300/50 backdrop-blur-xl sm:p-10">
@@ -53,9 +86,9 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
             </div>
           </div>
 
-          <h2 className="font-display text-3xl font-bold text-slate-800">
+          <h1 className="font-display text-3xl font-bold text-slate-800">
             Verzonden! 🎉
-          </h2>
+          </h1>
           <p className="mt-2 text-base font-medium text-slate-600">
             Super,{" "}
             <span className="font-bold text-violet-600">
@@ -70,7 +103,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
                 key={label}
                 className="flex items-start justify-between gap-4"
               >
-                <dt className="shrink-0 text-sm font-bold uppercase tracking-wide text-slate-400">
+                <dt className="shrink-0 text-sm font-bold uppercase tracking-wide text-slate-500">
                   {label}
                 </dt>
                 <dd className="whitespace-pre-line wrap-break-word text-right text-sm font-semibold text-slate-700">
