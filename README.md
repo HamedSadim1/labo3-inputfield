@@ -26,11 +26,13 @@ Een kleurrijk en speels contactformulier gebouwd met React, TypeScript en Tailwi
 - **Focusmanagement**: bij een mislukte submit springt de focus naar het eerste foutveld
 - **Auto-opslaan**: formuliergegevens en de huidige stap worden in `localStorage` bewaard, zodat de wizard een paginaverversing overleeft (en wordt opgeruimd na verzenden)
 
-### ♿ Toegankelijkheid
+### ♿ Toegankelijkheid (WCAG 2.2 AA)
 
-- `aria-invalid`, `aria-describedby`, `role="alert"` en `role="meter"` voor screenreaders
-- Duidelijke focus-ringen (`:focus-visible`) en ondersteuning voor `prefers-reduced-motion`
-- Goede kleurcontrasten en labels voor alle velden
+- **Semantische structuur**: één `h1` per scherm, een `nav`/`ol`-stepper met `aria-current`, een `<dl>` op het succes-scherm en een `<fieldset>` + `sr-only`-`<legend>` per stap, zodat screenreaders stapcontext bij de velden krijgen
+- **Screenreader-ondersteuning**: `aria-invalid`, `aria-describedby`, `role="alert"` (fouten), `role="meter"` (sterktemeter), een `aria-live="polite"`-regio die stapwissels aankondigt en `aria-hidden` op alle decoratieve emoji's
+- **Focusmanagement**: focus gaat na een mislukte submit naar het eerste foutveld, na een stapwissel naar het eerste veld, na verzenden naar de succes-kop en na reset terug naar het naamveld
+- **Contrast (geverifieerd met berekende ratio's)**: alle tekst ≥ 4.5:1 (AA); componentgrenzen en statusindicatoren ≥ 3:1 (WCAG 1.4.11) — input-randen, stepper-randen en focus-indicatoren op `*-500`-niveau, witte tekst op knoppen ≥ 4.7:1
+- **Toetsenbord & beweging**: native buttons/inputs (geen div-onclick), een globale `:focus-visible`-outline (violet-600) als één consistent focuspatroon en `prefers-reduced-motion` ondersteund in zowel CSS als de stapovergangshook (geen exit-vertraging, geen confetti)
 
 ## 🚀 Technologieën
 
@@ -148,7 +150,7 @@ src/
 ### Kleurenpalet
 
 - **Achtergrond**: zachte gradient van amber → roos → violet (pastel)
-- **Accent kleuren**: violet/fuchsia/amber voor knoppen en focus-ringen, emerald/teal voor succes states, rose voor fouten
+- **Accent kleuren**: violet/fuchsia voor de primaire actie, teal/emerald voor succes, rose voor fouten; amber is alleen decoratief (achtergrond, confetti) en voor de "Redelijk"-sterktemeter
 - **Kaarten**: witte, sterk afgeronde kaarten met blur en zachte kleurige schaduwen
 
 ### Typografie
@@ -162,8 +164,8 @@ src/
 
 ### Componenten
 
-- **Buttons**: gradient met lift- en schaduweffect bij hover, speelse emoji's
-- **Inputs**: witte velden met afgeronde hoeken en kleurrijke focus-ringen
+- **Buttons**: gradient met lift- en schaduweffect bij hover, speelse emoji's en één globale `:focus-visible`-outline (violet-600)
+- **Inputs**: witte velden met afgeronde hoeken, `slate-500`-randen (≥ 3:1) en violette focus-ringen
 - **Containers**: afgeronde witte kaarten met backdrop-blur
 
 ## 🤝 Bijdragen
