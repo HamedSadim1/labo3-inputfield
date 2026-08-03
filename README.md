@@ -86,6 +86,9 @@ Een kleurrijk en speels contactformulier gebouwd met React, TypeScript en Tailwi
 - Wachtwoorden moeten overeenkomen
 - Wachtwoord moet minstens 6 tekens bevatten, waaronder een hoofdletter, een cijfer en een symbool
 - Leeftijd moet een geheel getal tussen 0 en 120 zijn
+- Naam, e-mail en bericht hebben een maximale lengte (50, 254 en 500 tekens)
+
+Alle grenzen (wachtwoordlengte, leeftijd, veld-maxima) leven als één bron van waarheid in `src/utils/validation.ts` en worden gedeeld door de UI en de validatie
 
 ## 🏗️ Project Structuur
 
@@ -96,12 +99,12 @@ src/
 │   ├── CheckIcon.tsx           # Herbruikbaar checkmark-icoon (stepper + succesvinkje)
 │   ├── FloatingBackground.tsx  # Herbruikbare geanimeerde achtergrond
 │   ├── InputField.tsx          # Herbruikbare input component (iconen, hints, toggle, sterktemeter + checklist)
-│   ├── InputFields.tsx         # Hoofdformulier component met validatie
+│   ├── InputFields.tsx         # Hoofdformulier wizard (velden gerenderd vanuit de veldconfig)
 │   ├── Screen.tsx              # Pagina-shell (gradient + achtergrond + main)
 │   └── SuccessScreen.tsx       # Succes scherm met confetti en geanimeerd vinkje
 ├── utils/
 │   ├── storage.ts              # localStorage-draft: formuliergegevens bewaren/herstellen
-│   └── validation.ts           # Types, validatie logica en wachtwoord-hulpfuncties (sterkte + checklist)
+│   └── validation.ts           # Types, veldconfig (één bron van waarheid voor UI én validatie), validatie logica en wachtwoord-hulpfuncties (sterkte + checklist)
 ├── index.css                   # Globale styling en design tokens (Tailwind v4 @theme)
 ├── index.tsx                   # Applicatie entry point
 └── App.tsx                     # Root component

@@ -9,6 +9,8 @@ interface SuccessScreenProps {
   onReset: () => void;
 }
 
+const CONFETTI_COUNT = 30;
+
 const CONFETTI_COLORS = [
   "#8b5cf6",
   "#d946ef",
@@ -31,7 +33,7 @@ interface ConfettiPiece {
 const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
   const confetti = useMemo<ConfettiPiece[]>(
     () =>
-      Array.from({ length: 30 }, (_, id) => ({
+      Array.from({ length: CONFETTI_COUNT }, (_, id) => ({
         id,
         left: Math.random() * 100,
         delay: Math.random() * 3,
@@ -59,7 +61,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
         {confetti.map((piece) => (
           <span
             key={piece.id}
-            className="absolute top-[-20px] block animate-confetti"
+            className="absolute -top-5 block animate-confetti"
             style={{
               left: `${piece.left}%`,
               width: piece.size,
@@ -74,7 +76,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
       </div>
 
       <main className="relative z-10 flex min-h-dvh items-center justify-center px-4 py-12">
-        <div className="animate-bounce-in w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 p-8 text-center shadow-2xl shadow-teal-300/50 backdrop-blur-xl sm:p-10">
+        <div className="animate-bounce-in w-full max-w-lg overflow-hidden rounded-4xl border border-white/70 bg-white/90 p-8 text-center shadow-2xl shadow-teal-300/50 backdrop-blur-xl sm:p-10">
           <div className="relative mx-auto mb-6 h-24 w-24">
             <div className="absolute inset-0 animate-ping rounded-full bg-emerald-300/40" />
             <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-300/60">
@@ -102,7 +104,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
                 <dt className="shrink-0 text-sm font-bold uppercase tracking-wide text-slate-400">
                   {label}
                 </dt>
-                <dd className="whitespace-pre-line break-words text-right text-sm font-semibold text-slate-700">
+                <dd className="whitespace-pre-line wrap-break-word text-right text-sm font-semibold text-slate-700">
                   {value}
                 </dd>
               </div>

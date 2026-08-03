@@ -18,8 +18,10 @@
     both;
   --animate-slide-in-left: slide-in-left 0.35s cubic-bezier(0.22, 1, 0.36, 1)
     both;
-  --animate-slide-out-right: slide-out-right 0.25s ease-in both;
-  --animate-slide-out-left: slide-out-left 0.25s ease-in both;
+  --animate-slide-out-right: slide-out-right var(--step-exit-duration) ease-in
+    both;
+  --animate-slide-out-left: slide-out-left var(--step-exit-duration) ease-in
+    both;
 
   @keyframes float {
     0%,
@@ -179,6 +181,11 @@
       opacity: 0;
     }
   }
+}
+
+:root {
+  /* Enige bron voor de uitgaande stapovergang (JS leest deze via getComputedStyle). */
+  --step-exit-duration: 250ms;
 }
 
 @layer base {

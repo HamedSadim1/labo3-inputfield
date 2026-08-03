@@ -1,5 +1,5 @@
 import type { FormData } from "./validation";
-import { FORM_FIELDS } from "./validation";
+import { FORM_FIELDS, isFormFieldName } from "./validation";
 
 const STORAGE_KEY = "contact-form-draft";
 
@@ -57,7 +57,7 @@ const isFormDraft = (value: unknown): value is FormDraft => {
   const hasValidFields =
     fieldNames.length === FORM_FIELDS.length &&
     fieldNames.every(
-      (name) => FORM_FIELDS.includes(name) && typeof formData[name] === "string"
+      (name) => isFormFieldName(name) && typeof formData[name] === "string"
     );
 
   return hasValidFields && currentStep >= 0;

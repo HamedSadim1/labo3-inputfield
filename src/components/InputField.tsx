@@ -1,11 +1,17 @@
 import React, { useState } from "react";
-import type { FormFieldName, PasswordStrength } from "../utils/validation";
+import type {
+  FormFieldName,
+  InputType,
+  PasswordStrength,
+} from "../utils/validation";
 import {
   getPasswordRequirements,
   getPasswordStrength,
+  MAX_PASSWORD_STRENGTH,
 } from "../utils/validation";
+import { cn } from "../utils/cn";
 
-export type InputType = "text" | "email" | "password" | "number" | "textarea";
+const DEFAULT_TEXTAREA_ROWS = 4;
 
 interface InputFieldProps {
   label: string;
@@ -77,12 +83,15 @@ const InputField: React.FC<InputFieldProps> = ({
   const inputType = isPassword && showPassword ? "text" : type;
   const strength = getPasswordStrength(value);
 
-  const baseClasses =
-    "w-full rounded-2xl border-2 bg-white px-4 py-3 text-slate-800 placeholder-slate-400 shadow-sm outline-none transition-all duration-200 " +
-    (isPassword ? "pr-12 " : "") +
-    (error
+  const baseClasses = cn(
+    "w-full rounded-2xl border-2 bg-white py-3 text-slate-800 placeholder-slate-400 shadow-sm outline-none transition-all duration-200",
+    // px-4 en pr-12 conflicteren in tailwind-merge (beide padding-groep);
+    // daarom bewust aparte subgroepen: links + rechts voor het wachtwoordveld.
+    isPassword ? "pl-4 pr-12" : "px-4",
+    error
       ? "border-rose-300 bg-rose-50/60 focus:border-rose-400 focus:ring-4 focus:ring-rose-200"
-      : "border-slate-200 hover:border-violet-300 focus:border-violet-400 focus:ring-4 focus:ring-violet-200");
+      : "border-slate-200 hover:border-violet-300 focus:border-violet-400 focus:ring-4 focus:ring-violet-200"
+  );
 
   const showChecklist = showPasswordFeedback && (focused || value.length > 0);
   const checklistId = `${id}-requirements`;
@@ -128,12 +137,12 @@ const InputField: React.FC<InputFieldProps> = ({
             value={value}
             onChange={onChange}
             onBlur={handleBlur}
-            rows={rows || 4}
+            rows={rows || DEFAULT_TEXTAREA_ROWS}
             placeholder={placeholder}
             maxLength={maxLength}
             aria-invalid={error ? true : undefined}
             aria-describedby={describedBy}
-            className={`${baseClasses} resize-y`}
+            className={cn(baseClasses, "resize-y")}
           />
         ) : (
           <input
@@ -188,26 +197,33 @@ const InputField: React.FC<InputFieldProps> = ({
               aria-live="polite"
               aria-label="Wachtwoordsterkte"
               aria-valuemin={0}
-              aria-valuemax={4}
+              aria-valuemax={MAX_PASSWORD_STRENGTH}
               aria-valuenow={strength}
               aria-valuetext={STRENGTH_META[strength].label}
             >
               <div className="flex items-center gap-2">
                 <div className="flex flex-1 gap-1" aria-hidden="true">
-                  {[1, 2, 3, 4].map((segment) => (
+                  {Array.from(
+                    { length: MAX_PASSWORD_STRENGTH },
+                    (_, index) => index + 1
+                  ).map((segment) => (
                     <span
                       key={segment}
-                      className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                      className={cn(
+                        "h-1.5 flex-1 rounded-full transition-all duration-300",
                         segment <= strength
                           ? STRENGTH_META[strength].barColor
                           : "bg-slate-200"
-                      }`}
+                      )}
                     />
                   ))}
                 </div>
                 <span
                   key={STRENGTH_META[strength].label}
-                  className={`animate-pop text-xs font-bold ${STRENGTH_META[strength].textColor}`}
+                  className={cn(
+                    "animate-pop text-xs font-bold",
+                    STRENGTH_META[strength].textColor
+                  )}
                 >
                   {STRENGTH_META[strength].label}
                 </span>
@@ -219,15 +235,17 @@ const InputField: React.FC<InputFieldProps> = ({
             {getPasswordRequirements(value).map(({ label, met }) => (
               <li
                 key={label}
-                className={`flex items-center gap-1.5 text-xs font-semibold transition-colors duration-200 ${
+                className={cn(
+                  "flex items-center gap-1.5 text-xs font-semibold transition-colors duration-200",
                   met ? "text-emerald-600" : "text-slate-500"
-                }`}
+                )}
               >
                 <span
                   aria-hidden="true"
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] transition-colors duration-200 ${
+                  className={cn(
+                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] transition-colors duration-200",
                     met ? "bg-emerald-100" : "bg-slate-100"
-                  }`}
+                  )}
                 >
                   {met ? "✓" : "✗"}
                 </span>

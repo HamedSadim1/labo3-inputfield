@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "../utils/cn";
 
 interface FloatingBackgroundProps {
   variant?: "playful" | "celebration";
@@ -52,7 +53,10 @@ const FloatingBackground: React.FC<FloatingBackgroundProps> = ({
       {STICKERS.map((sticker) => (
         <span
           key={sticker.emoji}
-          className={`absolute hidden animate-float select-none drop-shadow-lg sm:block ${sticker.className}`}
+          className={cn(
+            "absolute hidden animate-float select-none drop-shadow-lg sm:block",
+            sticker.className
+          )}
           style={{ animationDelay: sticker.delay }}
         >
           {sticker.emoji}

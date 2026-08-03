@@ -1,5 +1,6 @@
 import React from "react";
 import FloatingBackground from "./FloatingBackground";
+import { cn } from "../utils/cn";
 
 type ScreenVariant = "playful" | "celebration";
 
@@ -15,7 +16,10 @@ const SCREEN_BG: Record<ScreenVariant, string> = {
 
 const Screen: React.FC<ScreenProps> = ({ variant = "playful", children }) => (
   <div
-    className={`relative min-h-dvh overflow-hidden bg-linear-to-br ${SCREEN_BG[variant]}`}
+    className={cn(
+      "relative min-h-dvh overflow-hidden bg-linear-to-br",
+      SCREEN_BG[variant]
+    )}
   >
     <FloatingBackground variant={variant} />
     {children}

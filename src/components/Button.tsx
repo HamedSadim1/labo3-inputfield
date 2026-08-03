@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "../utils/cn";
 
 type ButtonVariant = "primary" | "secondary" | "success";
 type ButtonSize = "md" | "lg";
@@ -39,7 +40,12 @@ const Button: React.FC<ButtonProps> = ({
         ...(isGradient ? { backgroundSize: "200% auto" } : null),
         ...style,
       }}
-      className={`rounded-2xl font-display text-lg font-bold transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 ${SIZE_CLASSES[size]} ${VARIANT_CLASSES[variant]} ${className}`}
+      className={cn(
+        "rounded-2xl font-display text-lg font-bold transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4",
+        SIZE_CLASSES[size],
+        VARIANT_CLASSES[variant],
+        className
+      )}
     />
   );
 };

@@ -5,21 +5,21 @@ import InputField from "./InputField";
 import Screen from "./Screen";
 import SuccessScreen from "./SuccessScreen";
 import { clearFormDraft, loadFormDraft, saveFormDraft } from "../utils/storage";
+import { cn } from "../utils/cn";
+import type { FormDraft } from "../utils/storage";
 import type {
+  FieldConfig,
   FormData,
   FormFieldName,
   ValidationErrors,
 } from "../utils/validation";
-import { isFormFieldName, validateForm } from "../utils/validation";
-
-const initialFormData: FormData = {
-  name: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  age: "",
-  message: "",
-};
+import {
+  FIELDS,
+  FORM_FIELDS,
+  getFormFieldName,
+  LINKED_FIELDS,
+  validateForm,
+} from "../utils/validation";
 
 const FEATURES: Array<[string, string]> = [
   ["⚡", "Realtime validatie en feedback"],
@@ -33,11 +33,44 @@ interface Step {
   fields: FormFieldName[];
 }
 
-const STEPS: Step[] = [
-  { title: "Gegevens", emoji: "👤", fields: ["name", "email", "age"] },
-  { title: "Veiligheid", emoji: "🔒", fields: ["password", "confirmPassword"] },
-  { title: "Bericht", emoji: "💬", fields: ["message"] },
+const STEP_CONFIG: Array<{ title: string; emoji: string; step: number }> = [
+  { title: "Gegevens", emoji: "👤", step: 0 },
+  { title: "Veiligheid", emoji: "🔒", step: 1 },
+  { title: "Bericht", emoji: "💬", step: 2 },
 ];
+
+// Velden per stap afgeleid uit de veldconfig, zodat de stapindeling en de
+// velden nooit uit elkaar kunnen lopen.
+const STEPS: Step[] = STEP_CONFIG.map(({ title, emoji, step }) => ({
+  title,
+  emoji,
+  fields: FIELDS.filter((field) => field.step === step).map(
+    (field) => field.name
+  ),
+}));
+
+// Dev-tijd-invariant: een veld met een stap die niet in STEP_CONFIG zit,
+// zou stilzwijgend nooit worden gerenderd — dat willen we vroeg zien.
+if (import.meta.env.DEV) {
+  const fieldsWithoutStep = FIELDS.filter(
+    (field) => !STEP_CONFIG.some((config) => config.step === field.step)
+  );
+  if (fieldsWithoutStep.length > 0) {
+    console.error(
+      `Veld(er) zonder bijbehorende stap in STEP_CONFIG: ${fieldsWithoutStep
+        .map((field) => field.name)
+        .join(", ")}`
+    );
+  }
+}
+
+// Afgeleid uit de veldconfig: nieuwe velden hoeven hier niet te worden
+// bijgehouden. De {} as FormData-cast is nodig als startwaarde en wordt
+// direct daarna volledig gevuld.
+const initialFormData: FormData = FORM_FIELDS.reduce(
+  (acc, field) => ({ ...acc, [field]: "" }),
+  {} as FormData
+);
 
 type StepDirection = "forward" | "backward";
 
@@ -51,11 +84,26 @@ const STEP_EXIT: Record<StepDirection, string> = {
   backward: "animate-slide-out-right",
 };
 
-// Moet gelijk zijn aan de --animate-slide-out-* duur in index.css.
-const STEP_EXIT_MS = 250;
-
 const prefersReducedMotion = (): boolean =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Leest de uitgaande animatieduur uit de CSS-variabele, zodat JS en CSS
+// één bron delen (geen handmatig gespiegelde waarde meer). De minifier
+// normaliseert "250ms" soms naar ".25s", dus de eenheid telt mee.
+const getStepExitMs = (): number => {
+  const raw = window
+    .getComputedStyle(document.documentElement)
+    .getPropertyValue("--step-exit-duration")
+    .trim();
+  const parsed = Number.parseFloat(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return 250;
+  }
+  return raw.endsWith("ms") ? parsed : parsed * 1000;
+};
+
+const getInitialStep = (draft: FormDraft | null): number =>
+  Math.min(draft?.currentStep ?? 0, STEPS.length - 1);
 
 const updateFieldError = (
   prev: ValidationErrors,
@@ -80,10 +128,10 @@ const InputFields: React.FC = () => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState(() =>
-    Math.min(savedDraft?.currentStep ?? 0, STEPS.length - 1)
+    getInitialStep(savedDraft)
   );
   const [displayedStep, setDisplayedStep] = useState(() =>
-    Math.min(savedDraft?.currentStep ?? 0, STEPS.length - 1)
+    getInitialStep(savedDraft)
   );
   const [direction, setDirection] = useState<StepDirection>("forward");
   const [phase, setPhase] = useState<"enter" | "exit">("enter");
@@ -108,26 +156,26 @@ const InputFields: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    if (!isFormFieldName(name)) {
+    const field = getFormFieldName(name);
+    if (!field) {
       return;
     }
-    const key = name;
-    const next = { ...formData, [key]: value };
+    const next = { ...formData, [field]: value };
     setFormData(next);
 
     // Zodra een (gekoppeld) veld een fout heeft, live hervalideren zodat
     // de fout meteen verdwijnt wanneer de gebruiker het corrigeert.
     setErrors((prev) => {
-      const relatedFields: FormFieldName[] =
-        key === "password" || key === "confirmPassword"
-          ? ["password", "confirmPassword"]
-          : [key];
-      if (!relatedFields.some((field) => prev[field])) {
+      const relatedFields: readonly FormFieldName[] = LINKED_FIELDS[field] ?? [
+        field,
+      ];
+      if (!relatedFields.some((relatedField) => prev[relatedField])) {
         return prev;
       }
       const nextErrors = validateForm(next);
       return relatedFields.reduce(
-        (acc, field) => updateFieldError(acc, field, nextErrors[field]),
+        (acc, relatedField) =>
+          updateFieldError(acc, relatedField, nextErrors[relatedField]),
         prev
       );
     });
@@ -136,13 +184,12 @@ const InputFields: React.FC = () => {
   const handleBlur = (
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name } = e.target;
-    if (!isFormFieldName(name)) {
+    const field = getFormFieldName(e.target.name);
+    if (!field) {
       return;
     }
-    const key = name;
     setErrors((prev) =>
-      updateFieldError(prev, key, validateForm(formData)[key])
+      updateFieldError(prev, field, validateForm(formData)[field])
     );
   };
 
@@ -193,7 +240,7 @@ const InputFields: React.FC = () => {
       },
       // Bij prefers-reduced-motion zijn de CSS-animaties uitgeschakeld;
       // wissel dan direct zonder de exit-vertraging.
-      prefersReducedMotion() ? 0 : STEP_EXIT_MS
+      prefersReducedMotion() ? 0 : getStepExitMs()
     );
   };
 
@@ -205,8 +252,8 @@ const InputFields: React.FC = () => {
       const stepErrors = getStepErrors(currentStep);
       if (Object.keys(stepErrors).length > 0) {
         setErrors(stepErrors);
-        const firstError = Object.keys(stepErrors)[0];
-        if (isFormFieldName(firstError)) {
+        const firstError = getFormFieldName(Object.keys(stepErrors)[0]);
+        if (firstError) {
           focusFieldAfterRender(firstError);
         }
         return;
@@ -222,8 +269,8 @@ const InputFields: React.FC = () => {
       return;
     }
     setErrors(validationErrors);
-    const firstField = Object.keys(validationErrors)[0];
-    if (!isFormFieldName(firstField)) {
+    const firstField = getFormFieldName(Object.keys(validationErrors)[0]);
+    if (!firstField) {
       return;
     }
     const errorStep = STEPS.findIndex((step) =>
@@ -323,9 +370,10 @@ const InputFields: React.FC = () => {
                           className="absolute left-1/2 top-6 h-1 w-full -translate-y-1/2 overflow-hidden rounded-full bg-slate-200"
                         >
                           <span
-                            className={`block h-full rounded-full bg-linear-to-r from-emerald-400 to-teal-500 transition-all duration-500 ${
+                            className={cn(
+                              "block h-full rounded-full bg-linear-to-r from-emerald-400 to-teal-500 transition-all duration-500",
                               isDone ? "w-full" : "w-0"
-                            }`}
+                            )}
                           />
                         </span>
                       )}
@@ -338,13 +386,14 @@ const InputFields: React.FC = () => {
                           isDone ? `${step.title} (voltooid)` : step.title
                         }
                         aria-current={isCurrent ? "step" : undefined}
-                        className={`relative flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-300 disabled:cursor-not-allowed ${
+                        className={cn(
+                          "relative flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-300 disabled:cursor-not-allowed",
                           isDone
                             ? "bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-300/60"
                             : isCurrent
                               ? "scale-110 bg-linear-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-fuchsia-400/60 ring-4 ring-fuchsia-200"
                               : "border-2 border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-500"
-                        }`}
+                        )}
                       >
                         {isDone ? (
                           <CheckIcon />
@@ -354,13 +403,14 @@ const InputFields: React.FC = () => {
                       </button>
 
                       <span
-                        className={`mt-2 text-xs font-bold transition-colors duration-300 ${
+                        className={cn(
+                          "mt-2 text-xs font-bold transition-colors duration-300",
                           isCurrent
                             ? "text-violet-600"
                             : isDone
                               ? "text-emerald-600"
                               : "text-slate-400"
-                        }`}
+                        )}
                       >
                         {step.title}
                       </span>
@@ -373,119 +423,50 @@ const InputFields: React.FC = () => {
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
               <div
                 key={displayedStep}
-                className={`${
+                className={cn(
                   phase === "exit"
                     ? STEP_EXIT[direction]
-                    : STEP_ENTER[direction]
-                } space-y-5`}
+                    : STEP_ENTER[direction],
+                  "space-y-5"
+                )}
               >
-                {displayedStep === 0 && (
-                  <>
-                    <InputField
-                      label="Naam"
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.name}
-                      placeholder="Je voornaam"
-                      icon="👤"
-                      required
-                      autoComplete="name"
-                      maxLength={50}
-                    />
-
-                    <InputField
-                      label="E-mail"
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.email}
-                      placeholder="jij@voorbeeld.nl"
-                      icon="📧"
-                      required
-                      autoComplete="email"
-                      maxLength={254}
-                      hint="We delen je e-mailadres nooit met anderen 🤫"
-                    />
-
-                    <InputField
-                      label="Leeftijd"
-                      type="number"
-                      id="age"
-                      name="age"
-                      value={formData.age}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.age}
-                      placeholder="18"
-                      icon="🎂"
-                      required
-                      min="0"
-                      max="120"
-                      autoComplete="bday"
-                      hint="Tussen 0 en 120 jaar"
-                    />
-                  </>
-                )}
-
-                {displayedStep === 1 && (
-                  <>
-                    <InputField
-                      label="Wachtwoord"
-                      type="password"
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.password}
-                      placeholder="Minstens 6 tekens"
-                      icon="🔒"
-                      required
-                      autoComplete="new-password"
-                      hint="Minstens 6 tekens, hoofdletter, cijfer en symbool 💪"
-                      showPasswordFeedback
-                    />
-
-                    <InputField
-                      label="Bevestig wachtwoord"
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.confirmPassword}
-                      placeholder="Herhaal je wachtwoord"
-                      icon="🔑"
-                      required
-                      autoComplete="new-password"
-                    />
-                  </>
-                )}
-
-                {displayedStep === 2 && (
-                  <InputField
-                    label="Bericht"
-                    type="textarea"
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.message}
-                    placeholder="Vertel ons waar je hulp bij nodig hebt..."
-                    icon="💬"
-                    rows={4}
-                    maxLength={500}
-                    hint="Optioneel — alles mag, niets moet"
-                  />
+                {" "}
+                {FIELDS.filter((field) => field.step === displayedStep).map(
+                  (field) => {
+                    // Verbreed naar FieldConfig, zodat de optionele velden
+                    // (autoComplete, hint, ...) zonder cast toegankelijk zijn.
+                    const config: FieldConfig = field;
+                    return (
+                      <InputField
+                        key={config.name}
+                        label={config.label}
+                        type={config.type}
+                        id={config.name}
+                        name={field.name}
+                        value={formData[field.name]}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors[field.name]}
+                        placeholder={config.placeholder}
+                        icon={config.icon}
+                        required={config.required}
+                        autoComplete={config.autoComplete}
+                        min={
+                          config.min !== undefined
+                            ? String(config.min)
+                            : undefined
+                        }
+                        max={
+                          config.max !== undefined
+                            ? String(config.max)
+                            : undefined
+                        }
+                        maxLength={config.maxLength}
+                        hint={config.hint}
+                        showPasswordFeedback={config.showPasswordFeedback}
+                      />
+                    );
+                  }
                 )}
               </div>
 
