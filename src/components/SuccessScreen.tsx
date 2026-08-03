@@ -1,66 +1,137 @@
-import React from "react";
-import { FormData } from "../utils/validation";
+import React, { useMemo } from "react";
+import FloatingBackground from "./FloatingBackground";
+import type { FormData } from "../utils/validation";
 
 interface SuccessScreenProps {
   formData: FormData;
   onReset: () => void;
 }
 
+const CONFETTI_COLORS = [
+  "#8b5cf6",
+  "#d946ef",
+  "#f59e0b",
+  "#10b981",
+  "#0ea5e9",
+  "#f43f5e",
+];
+
+interface ConfettiPiece {
+  id: number;
+  left: number;
+  delay: number;
+  duration: number;
+  color: string;
+  size: number;
+  round: boolean;
+}
+
 const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
+  const confetti = useMemo<ConfettiPiece[]>(
+    () =>
+      Array.from({ length: 30 }, (_, id) => ({
+        id,
+        left: Math.random() * 100,
+        delay: Math.random() * 3,
+        duration: 3.5 + Math.random() * 3,
+        color: CONFETTI_COLORS[id % CONFETTI_COLORS.length] ?? "#8b5cf6",
+        size: 6 + Math.random() * 8,
+        round: id % 3 === 0,
+      })),
+    []
+  );
+
+  const summary: Array<[string, string]> = [
+    ["Naam", formData.name],
+    ["E-mail", formData.email],
+    ["Leeftijd", formData.age],
+    ["Bericht", formData.message || "—"],
+  ];
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-green-400 via-blue-500 to-purple-600 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="relative min-h-dvh overflow-hidden bg-linear-to-br from-emerald-100 via-teal-100 to-sky-100">
+      <FloatingBackground variant="celebration" />
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        {confetti.map((piece) => (
+          <span
+            key={piece.id}
+            className="absolute top-[-20px] block animate-confetti"
+            style={{
+              left: `${piece.left}%`,
+              width: piece.size,
+              height: piece.size * 1.6,
+              backgroundColor: piece.color,
+              borderRadius: piece.round ? "9999px" : "3px",
+              animationDelay: `${piece.delay}s`,
+              animationDuration: `${piece.duration}s`,
+            }}
+          />
+        ))}
       </div>
 
-      <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 max-w-md w-full">
-        <div className="text-center mb-6">
-          <div className="w-20 h-20 bg-green-400/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
-            <svg
-              className="w-10 h-10 text-green-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+      <main className="relative z-10 flex min-h-dvh items-center justify-center px-4 py-12">
+        <div className="animate-bounce-in w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 p-8 text-center shadow-2xl shadow-teal-300/50 backdrop-blur-xl sm:p-10">
+          <div className="relative mx-auto mb-6 h-24 w-24">
+            <div className="absolute inset-0 animate-ping rounded-full bg-emerald-300/40" />
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-300/60">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                className="h-12 w-12 text-white"
+              >
+                <path
+                  pathLength={1}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M5 13l4 4L19 7"
+                  className="animate-check"
+                  style={{ strokeDasharray: 1, strokeDashoffset: 1 }}
+                />
+              </svg>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-white drop-shadow-lg">
-            Formulier verzonden!
+
+          <h2 className="font-display text-3xl font-bold text-slate-800">
+            Verzonden! 🎉
           </h2>
-          <p className="text-white/80 mt-2 drop-shadow">
-            Bedankt voor je inzending.
+          <p className="mt-2 text-base font-medium text-slate-600">
+            Super,{" "}
+            <span className="font-bold text-violet-600">
+              {formData.name || "daar"}
+            </span>
+            ! We hebben je bericht ontvangen en nemen snel contact op. ✨
           </p>
+
+          <dl className="mt-7 space-y-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-5 text-left">
+            {summary.map(([label, value]) => (
+              <div
+                key={label}
+                className="flex items-start justify-between gap-4"
+              >
+                <dt className="shrink-0 text-sm font-bold uppercase tracking-wide text-slate-400">
+                  {label}
+                </dt>
+                <dd className="whitespace-pre-line break-words text-right text-sm font-semibold text-slate-700">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <button
+            onClick={onReset}
+            className="mt-8 w-full rounded-2xl bg-linear-to-r from-teal-500 to-emerald-500 px-6 py-4 font-display text-lg font-bold text-white shadow-lg shadow-emerald-300/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-400/50 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
+          >
+            ✏️ Nieuw formulier
+          </button>
         </div>
-        <div className="space-y-3 text-sm bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-          <p className="text-white/90">
-            <strong className="text-white">Naam:</strong> {formData.name}
-          </p>
-          <p className="text-white/90">
-            <strong className="text-white">Email:</strong> {formData.email}
-          </p>
-          <p className="text-white/90">
-            <strong className="text-white">Leeftijd:</strong> {formData.age}
-          </p>
-          <p className="text-white/90">
-            <strong className="text-white">Bericht:</strong>{" "}
-            {formData.message || "Geen bericht"}
-          </p>
-        </div>
-        <button
-          onClick={onReset}
-          className="w-full mt-6 bg-white/20 hover:bg-white/30 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl"
-        >
-          Nieuw formulier
-        </button>
-      </div>
+      </main>
     </div>
   );
 };

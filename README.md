@@ -1,41 +1,43 @@
 # ✨ Contact Formulier - Labo 3
 
-Een moderne, professionele contact formulier applicatie gebouwd met React, TypeScript en Tailwind CSS. Deze app demonstreert geavanceerde UI/UX principes met glasmorfisme design en uitgebreide formulier validatie.
+Een kleurrijk en speels contactformulier gebouwd met React, TypeScript en Tailwind CSS. De app demonstreert moderne UI/UX-principes: een playful design met micro-interacties, realtime validatie en uitgebreide toegankelijkheid.
 
 ![React](https://img.shields.io/badge/React-19.2.8-blue.svg)
-![TypeScript](https://img.shields.io/badge/TypeScript-7.0.2-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)
 ![Vite](https://img.shields.io/badge/Vite-8.2.0-646CFF.svg)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-38B2AC.svg)
 
 ## 🌟 Features
 
-### 🎨 **Moderne UI/UX Design**
+### 🎨 Kleurrijk & Playful Design
 
-- **Glasmorfisme effecten** met transparante elementen en blur achtergronden
-- **Responsive design** dat werkt op alle apparaten
-- **Smooth animaties** en overgangseffecten
-- **Levensechte schaduwen** en diepte-effecten
+- **Speelse typografie** met Baloo 2 (koppen) en Nunito (body) via Google Fonts
+- **Geanimeerde achtergrond** met zwevende stickers, blur-blobs en zachte gradienten (herbruikbaar `FloatingBackground`-component)
+- **Responsive split-layout**: hero sectie links, formulierkaart rechts, gestapeld op mobiel
+- **Micro-interacties** overal: hover-states, geanimeerde gradient-knop, shake-animatie bij fouten, confetti en een geanimeerd vinkje op het succescherm
 
-### 📝 **Geavanceerde Formulier Functionaliteit**
+### 📝 Geavanceerde Formulier Functionaliteit
 
-- **Real-time validatie** met duidelijke foutmeldingen
-- **TypeScript ondersteuning** voor type veiligheid
-- **Gecontroleerde componenten** voor optimale state management
-- **Formulier reset** functionaliteit
+- **Meerstappen-wizard** in 3 stappen (Gegevens → Veiligheid → Bericht) met een speelse progress-indicator, per-stap validatie en klikbare stappen
+- **Realtime validatie**: fouten verschijnen bij blur en verdwijnen live zodra de gebruiker corrigeert
+- **Wachtwoord-sterktemeter** (score 0-4) met gekleurde segmenten, label en een live checklist van vereisten (lengte, hoofdletter, cijfer, symbool)
+- **Wachtwoord-toggle** (👁️) om ingevoerde tekst te tonen of verbergen
+- **Velden met iconen**, hints en een tekenteller voor het berichtveld
+- **Focusmanagement**: bij een mislukte submit springt de focus naar het eerste foutveld
 
-### 🔧 **Technische Features**
+### ♿ Toegankelijkheid
 
-- **Modulaire component architectuur**
-- **Helper functies** voor validatie logica
-- **Error handling** voor gebruikersfeedback
-- **Accessibility** met proper labeling en focus states
+- `aria-invalid`, `aria-describedby`, `role="alert"` en `role="meter"` voor screenreaders
+- Duidelijke focus-ringen (`:focus-visible`) en ondersteuning voor `prefers-reduced-motion`
+- Goede kleurcontrasten en labels voor alle velden
 
 ## 🚀 Technologieën
 
 - **Frontend Framework**: React 19.2.8
-- **Programmeertaal**: TypeScript 7.0.2
+- **Programmeertaal**: TypeScript 5.9.3
 - **Build Tool**: Vite 8.2.0
 - **Styling**: Tailwind CSS 4.3.3
+- **Fonts**: Google Fonts (Baloo 2, Nunito)
 - **Development**: @vitejs/plugin-react
 
 ## 📦 Installatie
@@ -69,62 +71,70 @@ Een moderne, professionele contact formulier applicatie gebouwd met React, TypeS
 
 ### Formulier Velden
 
-- **Naam**: Verplicht tekstveld
-- **Email**: Verplicht email veld met validatie
-- **Leeftijd**: Verplicht numeriek veld (minimum 0)
-- **Wachtwoord**: Verplicht wachtwoord veld (minimaal 6 karakters)
-- **Bevestig wachtwoord**: Moet overeenkomen met wachtwoord
-- **Bericht**: Optioneel tekstgebied
+- **Naam**: Verplicht tekstveld (max. 50 tekens)
+- **Email**: Verplicht email veld met validatie (max. 254 tekens)
+- **Leeftijd**: Verplicht numeriek veld (0-120)
+- **Wachtwoord** (stap 2): Verplicht veld (minimaal 6 tekens) met sterktemeter en live vereisten-checklist
+- **Bevestig wachtwoord**: Moet overeenkomen met het wachtwoord
+- **Bericht**: Optioneel tekstgebied (max. 500 tekens) met tekenteller
 
 ### Validatie Regels
 
 - Alle verplichte velden moeten ingevuld zijn
 - Email moet een geldig formaat hebben
 - Wachtwoorden moeten overeenkomen
-- Leeftijd moet een positief getal zijn
+- Leeftijd moet een geheel getal tussen 0 en 120 zijn
 
 ## 🏗️ Project Structuur
 
 ```text
 src/
 ├── components/
-│   ├── InputField.tsx      # Herbruikbare input component
-│   ├── InputFields.tsx     # Hoofdformulier component
-│   └── SuccessScreen.tsx   # Succes scherm component
+│   ├── InputField.tsx          # Herbruikbare input component (iconen, hints, toggle, sterktemeter + checklist)
+│   ├── InputFields.tsx         # Hoofdformulier component met validatie
+│   ├── SuccessScreen.tsx       # Succes scherm met confetti en geanimeerd vinkje
+│   └── FloatingBackground.tsx  # Herbruikbare geanimeerde achtergrond
 ├── utils/
-│   └── validation.ts       # Validatie logica en types
-├── index.css               # Globale styling
-├── index.tsx               # Applicatie entry point
-└── App.tsx                 # Root component
+│   └── validation.ts           # Types, validatie logica en wachtwoord-hulpfuncties (sterkte + checklist)
+├── index.css                   # Globale styling en design tokens (Tailwind v4 @theme)
+├── index.tsx                   # Applicatie entry point
+└── App.tsx                     # Root component
 ```
 
 ## 📜 Scripts
 
-| Command           | Description              |
-| ----------------- | ------------------------ |
-| `npm run dev`     | Start development server |
-| `npm run build`   | Build voor productie     |
-| `npm run preview` | Preview productie build  |
+| Command             | Description                                                |
+| ------------------- | ---------------------------------------------------------- |
+| `npm run dev`       | Start development server                                   |
+| `npm run build`     | Build voor productie                                       |
+| `npm run preview`   | Preview productie build                                    |
+| `npm run lint`      | Lint met ESLint                                            |
+| `npm run typecheck` | Typecheck met TypeScript                                   |
+| `npm run format`    | Formatteer code met Prettier                               |
+| `npm run validate`  | Volledige kwaliteitscheck (format, lint, typecheck, build) |
 
 ## 🎨 Design Systeem
 
 ### Kleurenpalet
 
-- **Primaire achtergrond**: Gradient van blauw naar paars naar roze
-- **Glas effecten**: Transparante witte overlays met blur
-- **Accent kleuren**: Groen voor succes states, rood voor errors
+- **Achtergrond**: zachte gradient van amber → roos → violet (pastel)
+- **Accent kleuren**: violet/fuchsia/amber voor knoppen en focus-ringen, emerald/teal voor succes states, rose voor fouten
+- **Kaarten**: witte, sterk afgeronde kaarten met blur en zachte kleurige schaduwen
 
 ### Typografie
 
-- **Hoofdingen**: Bold, witte tekst met drop shadows
-- **Body tekst**: Semi-transparante witte tekst
-- **Labels**: Compacte, duidelijke labeling
+- **Koppen**: Baloo 2 (speels en rond)
+- **Body**: Nunito (leesbaar en vriendelijk)
+
+### Animaties
+
+- Alle animaties zijn gedefinieerd als design tokens in `index.css` (`@theme` + keyframes) en gerespecteerd bij `prefers-reduced-motion`
 
 ### Componenten
 
-- **Buttons**: Glazen styling met hover effecten
-- **Inputs**: Transparante velden met focus states
-- **Containers**: Rounded corners met schaduwen
+- **Buttons**: gradient met lift- en schaduweffect bij hover, speelse emoji's
+- **Inputs**: witte velden met afgeronde hoeken en kleurrijke focus-ringen
+- **Containers**: afgeronde witte kaarten met backdrop-blur
 
 ## 🤝 Bijdragen
 

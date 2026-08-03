@@ -1,55 +1,171 @@
 import React, { useState } from "react";
+import FloatingBackground from "./FloatingBackground";
 import InputField from "./InputField";
 import SuccessScreen from "./SuccessScreen";
-import { FormData, ValidationErrors, validateForm } from "../utils/validation";
+import type {
+  FormData,
+  FormFieldName,
+  ValidationErrors,
+} from "../utils/validation";
+import { isFormFieldName, validateForm } from "../utils/validation";
+
+const initialFormData: FormData = {
+  name: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  age: "",
+  message: "",
+};
+
+const FEATURES: Array<[string, string]> = [
+  ["⚡", "Realtime validatie en feedback"],
+  ["🔒", "Je gegevens blijven veilig en privé"],
+  ["🌈", "Kleurrijk, maar altijd toegankelijk"],
+];
+
+interface Step {
+  title: string;
+  emoji: string;
+  fields: FormFieldName[];
+}
+
+const STEPS: Step[] = [
+  { title: "Gegevens", emoji: "👤", fields: ["name", "email", "age"] },
+  { title: "Veiligheid", emoji: "🔒", fields: ["password", "confirmPassword"] },
+  { title: "Bericht", emoji: "💬", fields: ["message"] },
+];
 
 const InputFields: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    age: "",
-    message: "",
-  });
-
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name as keyof ValidationErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+    if (!isFormFieldName(name)) {
+      return;
+    }
+    const key = name;
+    const next = { ...formData, [key]: value };
+    setFormData(next);
+
+    // Zodra een (gekoppeld) veld een fout heeft, live hervalideren zodat
+    // de fout meteen verdwijnt wanneer de gebruiker het corrigeert.
+    setErrors((prev) => {
+      const relatedFields: FormFieldName[] =
+        key === "password" || key === "confirmPassword"
+          ? ["password", "confirmPassword"]
+          : [key];
+      if (!relatedFields.some((field) => prev[field])) {
+        return prev;
+      }
+      const nextErrors = validateForm(next);
+      const updated = { ...prev };
+      relatedFields.forEach((field) => {
+        const fieldError = nextErrors[field];
+        if (fieldError) {
+          updated[field] = fieldError;
+        } else {
+          delete updated[field];
+        }
+      });
+      return updated;
+    });
+  };
+
+  const handleBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name } = e.target;
+    if (!isFormFieldName(name)) {
+      return;
+    }
+    const key = name;
+    setErrors((prev) => {
+      const next = { ...prev };
+      const fieldError = validateForm(formData)[key];
+      if (fieldError) {
+        next[key] = fieldError;
+      } else {
+        delete next[key];
+      }
+      return next;
+    });
+  };
+
+  const getStepErrors = (step: number): ValidationErrors => {
+    const allErrors = validateForm(formData);
+    const stepErrors: ValidationErrors = {};
+    STEPS[step]?.fields.forEach((field) => {
+      const fieldError = allErrors[field];
+      if (fieldError) {
+        stepErrors[field] = fieldError;
+      }
+    });
+    return stepErrors;
+  };
+
+  const focusFieldAfterRender = (field: FormFieldName) => {
+    window.setTimeout(() => {
+      document.getElementById(field)?.focus();
+    }, 0);
+  };
+
+  const goToStep = (step: number) => {
+    setErrors({});
+    setCurrentStep(step);
+    const firstField = STEPS[step]?.fields[0];
+    if (firstField) {
+      focusFieldAfterRender(firstField);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Valideer de huidige stap; de laatste stap verzendt het formulier.
+    if (currentStep < STEPS.length - 1) {
+      const stepErrors = getStepErrors(currentStep);
+      if (Object.keys(stepErrors).length > 0) {
+        setErrors(stepErrors);
+        const firstError = Object.keys(stepErrors)[0];
+        if (isFormFieldName(firstError)) {
+          focusFieldAfterRender(firstError);
+        }
+        return;
+      }
+      goToStep(currentStep + 1);
+      return;
+    }
+
     const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length === 0) {
       setSubmitted(true);
-      // In a real app, you might send this to a server
-      console.log("Form submitted:", formData);
-    } else {
-      setErrors(validationErrors);
+      return;
     }
+    setErrors(validationErrors);
+    const firstField = Object.keys(validationErrors)[0];
+    if (!isFormFieldName(firstField)) {
+      return;
+    }
+    const errorStep = STEPS.findIndex((step) =>
+      step.fields.includes(firstField)
+    );
+    if (errorStep >= 0 && errorStep !== currentStep) {
+      setCurrentStep(errorStep);
+    }
+    focusFieldAfterRender(firstField);
   };
 
   const resetForm = () => {
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      age: "",
-      message: "",
-    });
+    setFormData(initialFormData);
     setErrors({});
     setSubmitted(false);
+    setCurrentStep(0);
   };
 
   if (submitted) {
@@ -57,102 +173,292 @@ const InputFields: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
+    <div className="relative min-h-dvh overflow-hidden bg-linear-to-br from-amber-100 via-rose-100 to-violet-200">
+      <FloatingBackground variant="playful" />
 
-      <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white drop-shadow-lg">
-            Contact Formulier
+      <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-6xl flex-col items-center justify-center gap-12 px-4 py-12 lg:flex-row lg:gap-20">
+        <section className="w-full max-w-md text-center lg:w-auto lg:max-w-sm lg:text-left">
+          <span className="inline-flex animate-pop items-center gap-2 rounded-full border border-violet-200 bg-white/80 px-4 py-1.5 text-sm font-bold text-violet-600 shadow-sm">
+            🎉 Nieuwe look, zelfde formulier
+          </span>
+
+          <h1 className="mt-5 font-display text-4xl font-bold leading-tight text-slate-800 sm:text-5xl">
+            Hé, laten we{" "}
+            <span className="bg-linear-to-r from-violet-600 via-fuchsia-500 to-amber-500 bg-clip-text text-transparent">
+              kennismaken
+            </span>
+            !
           </h1>
-          <p className="text-white/80 mt-2 drop-shadow">Vul je gegevens in</p>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <InputField
-            label="Naam"
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            error={errors.name}
-            placeholder="Je naam"
-            required
-          />
+          <p className="mt-4 text-base font-medium text-slate-600 sm:text-lg">
+            Vul het formulier hiernaast in en we nemen snel contact met je op.
+            💌
+          </p>
 
-          <InputField
-            label="Email"
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            error={errors.email}
-            placeholder="je@email.com"
-            required
-          />
+          <ul className="mt-6 space-y-3 text-left">
+            {FEATURES.map(([emoji, text]) => (
+              <li
+                key={text}
+                className="flex items-center gap-3 text-sm font-semibold text-slate-700"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/80 text-lg shadow-sm">
+                  {emoji}
+                </span>
+                {text}
+              </li>
+            ))}
+          </ul>
+        </section>
 
-          <InputField
-            label="Leeftijd"
-            type="number"
-            id="age"
-            name="age"
-            value={formData.age}
-            onChange={handleChange}
-            error={errors.age}
-            placeholder="18"
-            min="0"
-            required
-          />
+        <section className="w-full max-w-lg">
+          <div className="animate-rise rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-2xl shadow-violet-300/40 backdrop-blur-xl sm:p-8">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-slate-800">
+                  Contactformulier 📝
+                </h2>
+                <p className="mt-1 text-sm font-medium text-slate-500">
+                  Velden met een * zijn verplicht
+                </p>
+              </div>
+              <span className="rounded-full bg-linear-to-r from-violet-600 to-fuchsia-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
+                Stap {currentStep + 1}/{STEPS.length}
+              </span>
+            </div>
 
-          <InputField
-            label="Wachtwoord"
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            error={errors.password}
-            placeholder="Minstens 6 karakters"
-            required
-          />
+            {/* Progress-indicator */}
+            <nav aria-label="Formuliervoortgang" className="mb-8">
+              <ol className="flex">
+                {STEPS.map((step, index) => {
+                  const isDone = index < currentStep;
+                  const isCurrent = index === currentStep;
+                  const isLast = index === STEPS.length - 1;
+                  return (
+                    <li
+                      key={step.title}
+                      className="relative flex flex-1 flex-col items-center"
+                    >
+                      {!isLast && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-1/2 top-6 h-1 w-full -translate-y-1/2 overflow-hidden rounded-full bg-slate-200"
+                        >
+                          <span
+                            className={`block h-full rounded-full bg-linear-to-r from-emerald-400 to-teal-500 transition-all duration-500 ${
+                              isDone ? "w-full" : "w-0"
+                            }`}
+                          />
+                        </span>
+                      )}
 
-          <InputField
-            label="Bevestig wachtwoord"
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            error={errors.confirmPassword}
-            placeholder="Herhaal wachtwoord"
-            required
-          />
+                      <button
+                        type="button"
+                        onClick={() => goToStep(index)}
+                        disabled={index > currentStep}
+                        aria-label={
+                          isDone ? `${step.title} (voltooid)` : step.title
+                        }
+                        aria-current={isCurrent ? "step" : undefined}
+                        className={`relative flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-300 disabled:cursor-not-allowed ${
+                          isDone
+                            ? "bg-linear-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-300/60"
+                            : isCurrent
+                              ? "scale-110 bg-linear-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-fuchsia-400/60 ring-4 ring-fuchsia-200"
+                              : "border-2 border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-500"
+                        }`}
+                      >
+                        {isDone ? (
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                            className="h-5 w-5"
+                            aria-hidden="true"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        ) : (
+                          <span aria-hidden="true">{step.emoji}</span>
+                        )}
+                      </button>
 
-          <InputField
-            label="Bericht"
-            type="textarea"
-            id="message"
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            placeholder="Optioneel bericht..."
-            rows={4}
-          />
+                      <span
+                        className={`mt-2 text-xs font-bold transition-colors duration-300 ${
+                          isCurrent
+                            ? "text-violet-600"
+                            : isDone
+                              ? "text-emerald-600"
+                              : "text-slate-400"
+                        }`}
+                      >
+                        {step.title}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
 
-          <button
-            type="submit"
-            className="w-full bg-white/20 hover:bg-white/30 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl"
-          >
-            Verzenden
-          </button>
-        </form>
-      </div>
+            <form onSubmit={handleSubmit} noValidate className="space-y-5">
+              <div key={currentStep} className="animate-slide-in space-y-5">
+                {currentStep === 0 && (
+                  <>
+                    <InputField
+                      label="Naam"
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.name}
+                      placeholder="Je voornaam"
+                      icon="👤"
+                      required
+                      autoComplete="name"
+                      maxLength={50}
+                    />
+
+                    <InputField
+                      label="E-mail"
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.email}
+                      placeholder="jij@voorbeeld.nl"
+                      icon="📧"
+                      required
+                      autoComplete="email"
+                      maxLength={254}
+                      hint="We delen je e-mailadres nooit met anderen 🤫"
+                    />
+
+                    <InputField
+                      label="Leeftijd"
+                      type="number"
+                      id="age"
+                      name="age"
+                      value={formData.age}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.age}
+                      placeholder="18"
+                      icon="🎂"
+                      required
+                      min="0"
+                      max="120"
+                      autoComplete="bday"
+                      hint="Tussen 0 en 120 jaar"
+                    />
+                  </>
+                )}
+
+                {currentStep === 1 && (
+                  <>
+                    <InputField
+                      label="Wachtwoord"
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.password}
+                      placeholder="Minstens 6 tekens"
+                      icon="🔒"
+                      required
+                      autoComplete="new-password"
+                      hint="Minstens 6 tekens, hoe langer hoe beter 💪"
+                      showPasswordFeedback
+                    />
+
+                    <InputField
+                      label="Bevestig wachtwoord"
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.confirmPassword}
+                      placeholder="Herhaal je wachtwoord"
+                      icon="🔑"
+                      required
+                      autoComplete="new-password"
+                    />
+                  </>
+                )}
+
+                {currentStep === 2 && (
+                  <InputField
+                    label="Bericht"
+                    type="textarea"
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.message}
+                    placeholder="Vertel ons waar je hulp bij nodig hebt..."
+                    icon="💬"
+                    rows={4}
+                    maxLength={500}
+                    hint="Optioneel — alles mag, niets moet"
+                  />
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                {currentStep > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => goToStep(currentStep - 1)}
+                    className="rounded-2xl border-2 border-violet-200 bg-white px-5 py-4 font-display text-lg font-bold text-violet-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-lg active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-200"
+                  >
+                    ← Vorige
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  className="group flex flex-1 animate-gradient-x items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-violet-600 via-fuchsia-500 to-amber-400 px-6 py-4 font-display text-lg font-bold text-white shadow-lg shadow-fuchsia-300/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-fuchsia-400/50 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-fuchsia-300"
+                  style={{ backgroundSize: "200% auto" }}
+                >
+                  {currentStep === STEPS.length - 1 ? (
+                    <>
+                      <span
+                        className="transition-transform duration-300 group-hover:-rotate-12 group-hover:scale-110"
+                        aria-hidden="true"
+                      >
+                        🚀
+                      </span>
+                      Verzenden
+                    </>
+                  ) : (
+                    <>
+                      Volgende
+                      <span
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                        aria-hidden="true"
+                      >
+                        →
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
     </div>
   );
 };
