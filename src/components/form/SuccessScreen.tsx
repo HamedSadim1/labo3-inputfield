@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   CONFETTI_COUNT,
   CONFETTI_FADE_MS,
@@ -19,6 +19,15 @@ interface SuccessScreenProps {
 
 const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
   const confetti = useMemo(() => createConfettiPieces(CONFETTI_COUNT), []);
+
+  // Na verzenden valt de focus terug naar <body>; verplaats hem naar de
+  // succes-kop, zodat screenreaders en toetsenbordgebruikers weten dat de
+  // flow is voltooid. tabIndex={-1} maakt de h1 programmeerbaar focuseerbaar.
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
 
   // De confetti valt niet oneindig: na een tijd een korte fade-out en dan
   // unmount (rustiger voor de gebruiker én de batterij).
@@ -86,7 +95,11 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
             </div>
           </div>
 
-          <h1 className="font-display text-3xl font-bold text-slate-800">
+          <h1
+            ref={headingRef}
+            tabIndex={-1}
+            className="font-display text-3xl font-bold text-slate-800"
+          >
             Verzonden! 🎉
           </h1>
           <p className="mt-2 text-base font-medium text-slate-600">
