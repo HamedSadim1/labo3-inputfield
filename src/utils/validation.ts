@@ -11,7 +11,7 @@ export type FormFieldName = keyof FormData;
 
 export type ValidationErrors = Partial<Record<FormFieldName, string>>;
 
-const FORM_FIELDS: readonly string[] = [
+export const FORM_FIELDS: readonly string[] = [
   "name",
   "email",
   "password",
@@ -27,15 +27,28 @@ export const isFormFieldName = (
 
 const MAX_AGE = 120;
 
+const hasUppercase = (value: string) => /[A-Z]/.test(value);
+const hasLowercase = (value: string) => /[a-z]/.test(value);
+const hasDigit = (value: string) => /\d/.test(value);
+const hasSymbol = (value: string) => /[^a-zA-Z0-9]/.test(value);
+
 export type PasswordStrength = 0 | 1 | 2 | 3 | 4;
+
+const toPasswordStrength = (score: number): PasswordStrength => {
+  if (score <= 0) return 0;
+  if (score === 1) return 1;
+  if (score === 2) return 2;
+  if (score === 3) return 3;
+  return 4;
+};
 
 export const getPasswordStrength = (password: string): PasswordStrength => {
   let score = 0;
   if (password.length >= 6) score += 1;
   if (password.length >= 10) score += 1;
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
-  if (/\d/.test(password) && /[^a-zA-Z0-9]/.test(password)) score += 1;
-  return score as PasswordStrength;
+  if (hasLowercase(password) && hasUppercase(password)) score += 1;
+  if (hasDigit(password) && hasSymbol(password)) score += 1;
+  return toPasswordStrength(score);
 };
 
 export interface PasswordRequirement {
@@ -46,10 +59,10 @@ export interface PasswordRequirement {
 export const getPasswordRequirements = (
   password: string
 ): PasswordRequirement[] => [
-  { label: "Minstens 6 tekens", met: password.length >= 6 },
-  { label: "Hoofdletter", met: /[A-Z]/.test(password) },
-  { label: "Cijfer", met: /\d/.test(password) },
-  { label: "Symbool", met: /[^a-zA-Z0-9]/.test(password) },
+  { label: "minstens 6 tekens", met: password.length >= 6 },
+  { label: "een hoofdletter", met: hasUppercase(password) },
+  { label: "een cijfer", met: hasDigit(password) },
+  { label: "een symbool", met: hasSymbol(password) },
 ];
 
 export const validateForm = (formData: FormData): ValidationErrors => {
@@ -67,8 +80,13 @@ export const validateForm = (formData: FormData): ValidationErrors => {
 
   if (!formData.password) {
     errors.password = "Wachtwoord is verplicht";
-  } else if (formData.password.length < 6) {
-    errors.password = "Wachtwoord moet minstens 6 tekens bevatten";
+  } else {
+    const missingRequirements = getPasswordRequirements(formData.password)
+      .filter((requirement) => !requirement.met)
+      .map((requirement) => requirement.label);
+    if (missingRequirements.length > 0) {
+      errors.password = `Wachtwoord mist: ${missingRequirements.join(", ")}`;
+    }
   }
 
   if (formData.password && formData.confirmPassword !== formData.password) {

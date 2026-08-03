@@ -1,7 +1,10 @@
-import React, { useState } from "react";
-import FloatingBackground from "./FloatingBackground";
+import React, { useEffect, useMemo, useState } from "react";
+import Button from "./Button";
+import CheckIcon from "./CheckIcon";
 import InputField from "./InputField";
+import Screen from "./Screen";
 import SuccessScreen from "./SuccessScreen";
+import { clearFormDraft, loadFormDraft, saveFormDraft } from "../utils/storage";
 import type {
   FormData,
   FormFieldName,
@@ -36,11 +39,43 @@ const STEPS: Step[] = [
   { title: "Bericht", emoji: "💬", fields: ["message"] },
 ];
 
+const STEP_ANIMATION: Record<"left" | "right", string> = {
+  left: "animate-slide-in-left",
+  right: "animate-slide-in-right",
+};
+
+const updateFieldError = (
+  prev: ValidationErrors,
+  field: FormFieldName,
+  fieldError: string | undefined
+): ValidationErrors => {
+  const next = { ...prev };
+  if (fieldError) {
+    next[field] = fieldError;
+  } else {
+    delete next[field];
+  }
+  return next;
+};
+
 const InputFields: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const savedDraft = useMemo(loadFormDraft, []);
+
+  const [formData, setFormData] = useState<FormData>(
+    () => savedDraft?.formData ?? initialFormData
+  );
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [submitted, setSubmitted] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(() =>
+    Math.min(savedDraft?.currentStep ?? 0, STEPS.length - 1)
+  );
+  const [slideFrom, setSlideFrom] = useState<"left" | "right">("right");
+
+  // Bewaar de formuliergegevens en huidige stap, zodat de wizard een
+  // paginaverversing overleeft.
+  useEffect(() => {
+    saveFormDraft({ formData, currentStep });
+  }, [formData, currentStep]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -64,16 +99,10 @@ const InputFields: React.FC = () => {
         return prev;
       }
       const nextErrors = validateForm(next);
-      const updated = { ...prev };
-      relatedFields.forEach((field) => {
-        const fieldError = nextErrors[field];
-        if (fieldError) {
-          updated[field] = fieldError;
-        } else {
-          delete updated[field];
-        }
-      });
-      return updated;
+      return relatedFields.reduce(
+        (acc, field) => updateFieldError(acc, field, nextErrors[field]),
+        prev
+      );
     });
   };
 
@@ -85,16 +114,9 @@ const InputFields: React.FC = () => {
       return;
     }
     const key = name;
-    setErrors((prev) => {
-      const next = { ...prev };
-      const fieldError = validateForm(formData)[key];
-      if (fieldError) {
-        next[key] = fieldError;
-      } else {
-        delete next[key];
-      }
-      return next;
-    });
+    setErrors((prev) =>
+      updateFieldError(prev, key, validateForm(formData)[key])
+    );
   };
 
   const getStepErrors = (step: number): ValidationErrors => {
@@ -116,6 +138,7 @@ const InputFields: React.FC = () => {
   };
 
   const goToStep = (step: number) => {
+    setSlideFrom(step > currentStep ? "right" : "left");
     setErrors({});
     setCurrentStep(step);
     const firstField = STEPS[step]?.fields[0];
@@ -144,6 +167,7 @@ const InputFields: React.FC = () => {
 
     const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length === 0) {
+      clearFormDraft();
       setSubmitted(true);
       return;
     }
@@ -156,6 +180,7 @@ const InputFields: React.FC = () => {
       step.fields.includes(firstField)
     );
     if (errorStep >= 0 && errorStep !== currentStep) {
+      setSlideFrom(errorStep < currentStep ? "left" : "right");
       setCurrentStep(errorStep);
     }
     focusFieldAfterRender(firstField);
@@ -173,9 +198,7 @@ const InputFields: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-linear-to-br from-amber-100 via-rose-100 to-violet-200">
-      <FloatingBackground variant="playful" />
-
+    <Screen variant="playful">
       <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-6xl flex-col items-center justify-center gap-12 px-4 py-12 lg:flex-row lg:gap-20">
         <section className="w-full max-w-md text-center lg:w-auto lg:max-w-sm lg:text-left">
           <span className="inline-flex animate-pop items-center gap-2 rounded-full border border-violet-200 bg-white/80 px-4 py-1.5 text-sm font-bold text-violet-600 shadow-sm">
@@ -268,20 +291,7 @@ const InputFields: React.FC = () => {
                         }`}
                       >
                         {isDone ? (
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={3}
-                            className="h-5 w-5"
-                            aria-hidden="true"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
+                          <CheckIcon />
                         ) : (
                           <span aria-hidden="true">{step.emoji}</span>
                         )}
@@ -305,7 +315,10 @@ const InputFields: React.FC = () => {
             </nav>
 
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
-              <div key={currentStep} className="animate-slide-in space-y-5">
+              <div
+                key={currentStep}
+                className={`${STEP_ANIMATION[slideFrom]} space-y-5`}
+              >
                 {currentStep === 0 && (
                   <>
                     <InputField
@@ -376,7 +389,7 @@ const InputFields: React.FC = () => {
                       icon="🔒"
                       required
                       autoComplete="new-password"
-                      hint="Minstens 6 tekens, hoe langer hoe beter 💪"
+                      hint="Minstens 6 tekens, hoofdletter, cijfer en symbool 💪"
                       showPasswordFeedback
                     />
 
@@ -418,19 +431,18 @@ const InputFields: React.FC = () => {
 
               <div className="flex gap-3 pt-2">
                 {currentStep > 0 && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
                     onClick={() => goToStep(currentStep - 1)}
-                    className="rounded-2xl border-2 border-violet-200 bg-white px-5 py-4 font-display text-lg font-bold text-violet-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-lg active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-200"
                   >
                     ← Vorige
-                  </button>
+                  </Button>
                 )}
 
-                <button
+                <Button
                   type="submit"
-                  className="group flex flex-1 animate-gradient-x items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-violet-600 via-fuchsia-500 to-amber-400 px-6 py-4 font-display text-lg font-bold text-white shadow-lg shadow-fuchsia-300/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-fuchsia-400/50 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-fuchsia-300"
-                  style={{ backgroundSize: "200% auto" }}
+                  variant="primary"
+                  className="group flex flex-1 items-center justify-center gap-2"
                 >
                   {currentStep === STEPS.length - 1 ? (
                     <>
@@ -453,13 +465,13 @@ const InputFields: React.FC = () => {
                       </span>
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
         </section>
       </main>
-    </div>
+    </Screen>
   );
 };
 

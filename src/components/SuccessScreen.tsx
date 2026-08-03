@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
-import FloatingBackground from "./FloatingBackground";
+import Button from "./Button";
+import CheckIcon from "./CheckIcon";
+import Screen from "./Screen";
 import type { FormData } from "../utils/validation";
 
 interface SuccessScreenProps {
@@ -49,9 +51,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
   ];
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-linear-to-br from-emerald-100 via-teal-100 to-sky-100">
-      <FloatingBackground variant="celebration" />
-
+    <Screen variant="celebration">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -78,22 +78,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
           <div className="relative mx-auto mb-6 h-24 w-24">
             <div className="absolute inset-0 animate-ping rounded-full bg-emerald-300/40" />
             <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-300/60">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                className="h-12 w-12 text-white"
-              >
-                <path
-                  pathLength={1}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={3}
-                  d="M5 13l4 4L19 7"
-                  className="animate-check"
-                  style={{ strokeDasharray: 1, strokeDashoffset: 1 }}
-                />
-              </svg>
+              <CheckIcon className="h-12 w-12 text-white" animated />
             </div>
           </div>
 
@@ -124,15 +109,12 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ formData, onReset }) => {
             ))}
           </dl>
 
-          <button
-            onClick={onReset}
-            className="mt-8 w-full rounded-2xl bg-linear-to-r from-teal-500 to-emerald-500 px-6 py-4 font-display text-lg font-bold text-white shadow-lg shadow-emerald-300/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-400/50 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
-          >
+          <Button variant="success" onClick={onReset} className="mt-8 w-full">
             ✏️ Nieuw formulier
-          </button>
+          </Button>
         </div>
       </main>
-    </div>
+    </Screen>
   );
 };
 

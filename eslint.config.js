@@ -16,6 +16,14 @@ export default tseslint.config(
       react,
       "react-hooks": reactHooks,
     },
+    languageOptions: {
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: ["vite.config.ts"],
+        },
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     settings: {
       react: {
         version: "detect",
@@ -26,6 +34,8 @@ export default tseslint.config(
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
       "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unnecessary-type-assertion": "error",
+      "@typescript-eslint/consistent-type-imports": "error",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
     },
