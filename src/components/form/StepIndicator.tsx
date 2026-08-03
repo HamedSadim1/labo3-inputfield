@@ -55,7 +55,9 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
                   ? "bg-linear-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-300/60"
                   : isCurrent
                     ? "scale-110 bg-linear-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-fuchsia-400/60 ring-4 ring-fuchsia-200"
-                    : "border-2 border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-600"
+                    : // border-slate-500: zelfde randschedheid als de input-velden
+                      // (≥3:1 op wit), zodat alle componentgrenzen consistent zijn.
+                      "border-2 border-slate-500 bg-white text-slate-500 hover:border-slate-600 hover:text-slate-600"
               )}
             >
               {isDone ? (
